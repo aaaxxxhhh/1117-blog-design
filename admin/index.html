@@ -7,65 +7,61 @@
 <title>관리자 — slow days</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/style.css?v=4">
 <style>
-  .wrap { padding:40px 28px 0; max-width:1360px; }
-  .menu { flex:1 1 200px; max-width:280px; display:flex; flex-direction:column; font-size:12px; text-transform:uppercase; letter-spacing:.04em; }
-  .menu a, .menu button { min-height:40px; display:flex; align-items:center; border:0; background:none; padding:0; cursor:pointer; text-transform:inherit; letter-spacing:inherit; font-size:inherit; text-align:left; }
-  .stats { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); border-top:1px solid var(--ink); border-bottom:1px solid var(--ink); margin-bottom:40px; }
-  .stats div { padding:18px 0; } .stats b { display:block; margin-top:6px; font-size:28px; font-weight:500; }
-  .tools { display:flex; gap:12px; flex-wrap:wrap; margin-bottom:16px; }
-  .tools input, .tools select { min-height:44px; border:0; background:var(--soft); padding:0 12px; }
+  .menu { display:flex; flex-direction:column; align-items:flex-start; gap:6px; font-weight:500; }
+  .menu a, .menu button { border:0; background:none; padding:0; cursor:pointer; font-size:inherit; text-align:left; }
+  .stats { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); border-top:1px solid var(--ink); border-bottom:1px solid var(--ink); margin-bottom:32px; }
+  .stats div { padding:14px 0; } .stats b { display:block; margin-top:4px; font-size:40px; line-height:1; font-weight:400; }
+  .tools { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px; }
+  .tools input, .tools select { height:32px; border:0; background:var(--soft); padding:0 8px; font-size:var(--wsm-fs); }
   .st { display:flex; align-items:center; gap:8px; } .st i { width:6px; height:6px; border-radius:50%; display:inline-block; }
-  .acts { display:flex; justify-content:flex-end; gap:4px; }
-  .acts a, .acts button { min-height:44px; padding:0 10px; display:flex; align-items:center; border:0; background:none; cursor:pointer; font-size:12px; }
+  .acts { display:flex; justify-content:flex-end; gap:12px; }
+  .acts a, .acts button { border:0; background:none; padding:0; cursor:pointer; font-size:inherit; }
   .acts button { color:var(--danger); }
-  footer { padding:80px 28px 32px; font-size:10px; text-transform:uppercase; letter-spacing:.04em; color:var(--sub); }
-  [hidden] { display:none !important; }
-  @media (max-width:640px) { .stats { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+  .dash.row2 { grid-template-columns:calc(43.3vw - var(--wsm-pad)) minmax(0,1fr); }
+  .head2 { display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:16px; }
+  @media (max-width:640px) { .stats { grid-template-columns:repeat(2,minmax(0,1fr)); } .dash.row2 { grid-template-columns:1fr; } }
 </style>
 </head>
 <body>
 <header class="wsm-top">
-  <span class="hint">/admin</span>
-  <div class="wsm-logo"><a class="logo" href="../">slow days</a><span class="dot" aria-hidden="true"></span><span style="font-size:12px" id="who">관리자</span></div>
+  <span class="icons hint" style="top:calc(var(--wsm-top) + 2px)">/admin</span>
+  <div class="right"><a class="logo-s" href="../">slow days</a><span class="dot" aria-hidden="true"></span><span id="who">관리자</span></div>
 </header>
 
 <!-- 로그인 화면 -->
-<section id="loginView" class="wrap" hidden>
-  <h1 class="wsm-title" style="margin-bottom:96px">Admin 관리자 로그인</h1>
+<section id="loginView" class="wsm-page" hidden>
+  <h1 class="wsm-title">Admin 관리자 로그인</h1>
   <div class="row2">
-    <div class="lab">Sign in 로그인<p class="hint" style="font-weight:400;margin:8px 0 0">관리자로 등록된 계정만 들어올 수 있어요.</p></div>
-    <form id="loginForm" class="fld" style="max-width:480px;gap:20px">
+    <div class="lab">Sign in 로그인<p class="hint" style="font-weight:400;margin:6px 0 0">관리자로 등록된 계정만 들어올 수 있어요.</p></div>
+    <form id="loginForm" class="fld" style="max-width:480px;gap:18px">
       <div style="display:flex;flex-direction:column;gap:6px"><label for="email" class="hint">이메일</label>
         <input id="email" class="line-in" type="email" autocomplete="username" required></div>
       <div style="display:flex;flex-direction:column;gap:6px"><label for="pw" class="hint">비밀번호</label>
         <input id="pw" class="line-in" type="password" autocomplete="current-password" required></div>
-      <label style="display:flex;align-items:center;gap:8px;min-height:44px;font-size:12px"><input type="checkbox" id="keep"> 이 기기에서 로그인 유지</label>
-      <button class="btn dark" type="submit" id="loginBtn" style="min-height:52px">로그인하고 관리자 페이지 열기</button>
+      <label style="display:flex;align-items:center;gap:8px"><input type="checkbox" id="keep"> 이 기기에서 로그인 유지</label>
+      <button class="btn dark" type="submit" id="loginBtn">로그인하고 관리자 페이지 열기</button>
       <p class="msg err" id="loginMsg" role="alert"></p>
-      <button type="button" id="resetBtn" style="border:0;background:none;padding:0;text-align:left;font-size:12px;color:var(--sub);min-height:44px;cursor:pointer">비밀번호를 잊었나요? 재설정 메일 받기</button>
+      <button type="button" id="resetBtn" style="border:0;background:none;padding:0;text-align:left;font-size:inherit;color:var(--sub);cursor:pointer">비밀번호를 잊었나요? 재설정 메일 받기</button>
     </form>
   </div>
 </section>
 
 <!-- 관리자 · 글 관리 -->
-<section id="dashView" hidden>
-  <div class="wrap" style="display:flex;flex-wrap:wrap;gap:24px">
-    <nav class="menu" aria-label="관리 메뉴">
-      <a href="./" style="font-weight:700">Posts 글 관리</a>
+<section id="dashView" class="wsm-page" hidden>
+  <div class="head2" style="margin-bottom:60px"><h1 class="wsm-title" style="margin-bottom:0">Posts 글 관리</h1><a class="btn dark" href="../write/">+ 새 글 쓰기</a></div>
+  <div class="row2 dash">
+    <nav class="menu lab" aria-label="관리 메뉴">
+      <a href="./">Posts 글 관리</a>
       <a href="../write/">Write 새 글 쓰기</a>
-      <a href="../" target="_blank" rel="noopener" class="muted" style="margin-top:24px">블로그 보기 →</a>
+      <a href="../" target="_blank" rel="noopener" class="muted" style="margin-top:18px">블로그 보기 →</a>
       <button type="button" id="logoutBtn" class="muted">로그아웃</button>
     </nav>
-    <main style="flex:999 1 640px;min-width:0;max-width:1080px">
-      <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:16px;margin-bottom:56px">
-        <h1 class="wsm-title" style="margin:0">Posts 글 관리</h1>
-        <a class="btn dark" href="../write/">+ 새 글 쓰기</a>
-      </div>
+    <main style="min-width:0">
       <div class="stats" id="stats"></div>
       <div class="tools">
-        <label for="aq" class="sr">글 검색</label><input id="aq" type="search" placeholder="제목으로 찾기" style="flex:1 1 260px">
+        <label for="aq" class="sr">글 검색</label><input id="aq" type="search" placeholder="제목으로 찾기" style="flex:1 1 200px">
         <label for="fs" class="sr">상태</label><select id="fs"><option value="">전체 상태</option><option value="published">발행</option><option value="scheduled">예약</option><option value="draft">임시 저장</option></select>
         <label for="fc" class="sr">분류</label><select id="fc"><option value="">전체 분류</option><option value="essay">에세이</option><option value="daily">일상</option><option value="space">공간</option><option value="books">책</option></select>
       </div>
@@ -75,10 +71,10 @@
   </div>
 </section>
 
-<footer>© 2026 slow days · 관리자 전용 화면</footer>
+<footer class="wsm-foot">© 2026 slow days · 관리자 전용 화면</footer>
 
 <script type="module">
-import { onUser, login, logout, resetPw, getAllPosts, removePost, esc, fmtDate } from "../assets/fb.js";
+import { onUser, login, logout, resetPw, getAllPosts, removePost, esc, fmtDate } from "../assets/fb.js?v=4";
 const $ = (id) => document.getElementById(id);
 const KO = { essay: "에세이", daily: "일상", space: "공간", books: "책" };
 const ST = { published: ["발행", "#2F5D50"], scheduled: ["예약", "#1F3A93"], draft: ["임시 저장", "#8A8A8A"] };
@@ -108,7 +104,7 @@ async function load() {
   try { all = await getAllPosts(); } catch (e) { $("dashMsg").textContent = "글을 불러오지 못했어요. 관리자 권한이 있는 계정인지 확인해 주세요."; console.error(e); return; }
   const c = { published: 0, scheduled: 0, draft: 0 }; all.forEach((p) => c[stateOf(p)]++);
   $("stats").innerHTML = [["전체 글", all.length], ["발행", c.published], ["예약", c.scheduled], ["임시 저장", c.draft]]
-    .map(([l, n]) => `<div><span class="hint upper">${l}</span><b>${n}</b></div>`).join("");
+    .map(([l, n]) => `<div><span class="hint">${l}</span><b>${n}</b></div>`).join("");
   draw();
 }
 function draw() {
