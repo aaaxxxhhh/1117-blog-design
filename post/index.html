@@ -93,8 +93,10 @@ if (!p) {
   if (p.coverId) art.querySelector(".cover .ph").innerHTML = `<img data-img="${esc(p.coverId)}" alt="${esc(p.titleKo || p.titleEn)}">`;
   hydrateImages(art);
   document.getElementById("copy").onclick = async (e) => {
-    try { await navigator.clipboard.writeText(shareUrl(id)); e.target.textContent = "복사했어요"; } catch { e.target.textContent = "복사 실패"; }
-    track("share", { method: "copy_link", content_type: "post", item_id: id, post_id: id, post_category: p.category });
+    try {
+      await navigator.clipboard.writeText(shareUrl(id)); e.target.textContent = "복사했어요";
+      track("share", { method: "copy_link", content_type: "post", item_id: id, post_id: id, post_category: p.category });
+    } catch { e.target.textContent = "복사 실패"; }
   };
   watchReading(art.querySelector(".body"), art.querySelector(".share"), { post_id: id, post_category: p.category });
   pageView({ post_id: id, post_category: p.category });
