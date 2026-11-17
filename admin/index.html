@@ -82,6 +82,7 @@ const stateOf = (p) => p.status !== "published" ? "draft" : (p.publishedAt && p.
 let all = [];
 
 onUser(async (user) => {
+  if (user) { try { localStorage.setItem("sd_internal", "1"); } catch {} } // GA 내부 방문 제외 표시
   $("loginView").hidden = !!user; $("dashView").hidden = !user;
   $("who").textContent = user ? user.email : "관리자";
   if (user) await load();
