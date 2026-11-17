@@ -6,7 +6,7 @@
 <title>slow days — 느리게 보는 생활 기록</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600&family=Noto+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@400&display=swap">
-<link rel="stylesheet" href="assets/style.css?v=4">
+<link rel="stylesheet" href="assets/style.css?v=5">
 <style>
   /* ① 첫 화면 : WSM 홈과 같은 크기·위치 (1440 / 768 / 390px에서 잰 값) */
   .intro { position:relative; overflow:hidden; font-size:var(--wsm-fs); line-height:1.4; padding-bottom:80px; }
@@ -92,6 +92,8 @@
 
 <script type="module">
 import { getPublished, cardHTML, sideHTML, esc, safeSrc } from "./assets/fb.js?v=4";
+import { pageView } from "./assets/ga.js?v=1";
+pageView();
 document.getElementById("side").outerHTML = sideHTML("", "");
 const T = ["#E2CFCB","#D9D4CC","#C9CFC8","#E4DED3","#BFC3C7","#D6CEC4","#CCD2CB"];
 const KIND = ["p", "l", "p", "p", "l", "p", "p"];   // 세로(p) · 가로(l) 사진이 섞이는 WSM 배치
