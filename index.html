@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 <title>slow days — 느리게 보는 생활 기록</title>
 <meta name="description" content="빨리 지나가는 하루를 천천히 다시 보는 생활 기록. 에세이, 일상, 공간, 책 이야기를 모읍니다.">
 <link rel="canonical" href="https://aaaxxxhhh.github.io/1117-blog-design/">
@@ -17,8 +18,9 @@
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600&family=Noto+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@400&display=swap">
-<link rel="stylesheet" href="assets/style.css?v=5">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600&family=Noto+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@400&display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600&family=Noto+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@400&display=swap"></noscript>
+<link rel="stylesheet" href="assets/style.css?v=6">
 <style>
   /* ① 첫 화면 : WSM 홈과 같은 크기·위치 (1440 / 768 / 390px에서 잰 값) */
   .intro { position:relative; overflow:hidden; font-size:var(--wsm-fs); line-height:1.4; padding-bottom:80px; }
@@ -103,7 +105,7 @@
 </div>
 
 <script type="module">
-import { getPublished, cardHTML, sideHTML, esc, safeSrc } from "./assets/fb.js?v=4";
+import { getPublished, cardHTML, sideHTML, esc, safeSrc, postHref } from "./assets/fb.js?v=5";
 import { pageView } from "./assets/ga.js?v=3";
 pageView();
 document.getElementById("side").outerHTML = sideHTML("", "");
@@ -117,7 +119,7 @@ if (list.length) {
   // 글 1개 = 사진 1장 (같은 글을 반복해서 채우지 않음)
   strip.innerHTML = list.slice(0, 7).map((p, i) => {
     const src = safeSrc(p.coverThumb || p.coverUrl);
-    return `<a class="${KIND[i]}" href="post/?id=${encodeURIComponent(p.id)}"><div class="ph" style="--tone:${T[i]}">${src ? `<img src="${esc(src)}" alt="${esc(p.titleKo || p.titleEn)}">` : "[사진]"}</div>${esc(p.titleKo || p.titleEn)} - ${CAT[p.category] || ""}</a>`;
+    return `<a class="${KIND[i]}" href="${postHref(p, "")}"><div class="ph" style="--tone:${T[i]}">${src ? `<img src="${esc(src)}" alt="${esc(p.titleKo || p.titleEn)}">` : "[사진]"}</div>${esc(p.titleKo || p.titleEn)} - ${CAT[p.category] || ""}</a>`;
   }).join("");
   document.getElementById("row1").innerHTML = list.slice(0, 3).map((p, i) => cardHTML(p, i, "")).join("");
   document.getElementById("row2").innerHTML = list.slice(3, 6).map((p, i) => cardHTML(p, i + 3, "")).join("");
