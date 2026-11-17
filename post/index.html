@@ -48,7 +48,7 @@
 </div>
 
 <script type="module">
-import { getPost, getPublished, sideHTML, esc, fmtDate, renderBody, cardHTML, photo, CAT_EN } from "../assets/fb.js";
+import { getPost, getPublished, sideHTML, esc, fmtDate, renderBody, cardHTML, photo, hydrateImages, CAT_EN } from "../assets/fb.js";
 const id = new URLSearchParams(location.search).get("id");
 let p = null;
 try { p = id ? await getPost(id) : null; } catch (e) { console.error(e); }
@@ -67,6 +67,8 @@ if (!p) {
     <div class="col body">${renderBody(p.body)}</div>
     <div class="col">${(p.tags || []).length ? `<p class="tags">${p.tags.map((t) => "#" + esc(t)).join(" ")}</p>` : ""}
       <div class="share"><a href="../list/">← 목록으로</a><button type="button" id="copy">링크 복사</button></div></div>`;
+  if (p.coverId) art.querySelector(".cover .ph").innerHTML = `<img data-img="${esc(p.coverId)}" alt="${esc(p.titleKo || p.titleEn)}">`;
+  hydrateImages(art);
   document.getElementById("copy").onclick = async (e) => { try { await navigator.clipboard.writeText(location.href); e.target.textContent = "복사했어요"; } catch { e.target.textContent = "복사 실패"; } };
   document.getElementById("foot").innerHTML = `<span>${esc(CAT_EN[p.category] || "")}</span><span>${esc(p.titleEn)} · ${esc(p.titleKo)}</span><span>${fmtDate(p.publishedAt)}</span>`;
 }
