@@ -37,13 +37,13 @@ export function track(name, params = {}) {
   window.gtag("event", name, { page_type: PAGE_TYPE, ...params });
 }
 
-// 페이지 조회 1회 전송 (글 상세는 제목을 불러온 뒤 호출)
+// 페이지 조회(page_view)는 Google 태그가 페이지가 열릴 때 자동으로 1회 보냄
+// (직접 보내면 자동 전송과 겹쳐 2회 집계되는 것을 2026-11-17 테스트에서 확인)
+// 글 상세는 글 번호·분류를 남기기 위해 post_view, 없는 주소는 page_not_found를 보냄
 export function pageView(extra = {}) {
-  track("page_view", {
-    page_title: document.title,
-    page_location: location.href,
-    ...extra,
-  });
+  if (extra.page_type === "not_found") return track("page_not_found", { page_type: "not_found" });
+  if (extra.not_found) return track("page_not_found", { post_id: extra.post_id || "" });
+  if (extra.post_id) return track("post_view", { post_id: extra.post_id, post_category: extra.post_category || "" });
 }
 
 // 클릭 위치(click_location): data-loc 속성이 있으면 그 값, 없으면 화면 영역으로 판단
