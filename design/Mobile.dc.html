@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>블로그 메인 · 모바일</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600&amp;family=Noto+Sans+KR:wght@400;500;700&amp;family=Noto+Serif+KR:wght@400;500&amp;display=swap">
+<style>
+body{margin:0;background:#FFFFFF}
+a{color:#111111;text-decoration:none}a:hover{color:#5A5A5A}
+</style>
+</helmet>
+<div style="width: 390px; height: 5400px; overflow: hidden; font-family: 'Inter Tight', 'Noto Sans KR', sans-serif; color: #111111; background: #FFFFFF; letter-spacing: 0.01em">
+
+  <!-- ① 첫 화면 : WSM 모바일 스타일 -->
+  <section aria-label="첫 화면" style="position: relative; height: 844px; overflow: hidden">
+    <header style="display: flex; justify-content: space-between; align-items: center; padding: 14px 12px 0">
+      <div style="display: flex; gap: 2px">
+        <button aria-label="메뉴 열기" style="width: 44px; height: 44px; border: 0; background: transparent; padding: 0; display: flex; align-items: center; justify-content: center">
+          <svg aria-hidden="true" width="24" height="16" viewBox="0 0 24 16" fill="none" stroke="#111" stroke-width="1.4"><line x1="0" y1="1" x2="24" y2="1"></line><line x1="0" y1="8" x2="24" y2="8"></line><line x1="0" y1="15" x2="24" y2="15"></line></svg>
+        </button>
+        <button aria-label="검색" style="width: 44px; height: 44px; border: 0; background: transparent; padding: 0; display: flex; align-items: center; justify-content: center">
+          <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="1.8"><circle cx="11" cy="11" r="8"></circle><line x1="17" y1="17" x2="22" y2="22"></line></svg>
+        </button>
+      </div>
+      <a href="#posts-m" style="display: flex; align-items: center; gap: 8px; font-size: 13px; min-height: 44px; padding-right: 8px"><span aria-hidden="true" style="width: 6px; height: 6px; border-radius: 50%; background: {{accent}}"></span>Seoul</a>
+    </header>
+
+    <h1 style="margin: 0; padding: 56px 0 0 54px; font-size: 52px; line-height: 0.9; font-weight: 600; letter-spacing: -0.045em">slow days</h1>
+
+    <div style="position: absolute; left: 10px; top: 270px; display: flex; gap: 20px; align-items: flex-start; white-space: nowrap">
+      <sc-for list="{{strip}}" as="item" hint-placeholder-count="3">
+        <a href="#posts-m" style="flex: 0 0 auto; width: {{item.w}}px; margin-top: {{item.mt}}px; display: flex; flex-direction: column; align-items: center; gap: 14px">
+          <div style="width: 100%; height: {{item.h}}px; background: {{item.tone}}; padding: 10px; box-sizing: border-box; font-size: 10px; color: #4A4740">[사진]</div>
+          <span style="font-size: 12px">{{item.title}} - {{item.cat}}</span>
+        </a>
+      </sc-for>
+    </div>
+
+    <a href="#posts-m" aria-label="아래로 이동" style="position: absolute; left: 173px; bottom: 16px; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center">
+      <svg aria-hidden="true" width="18" height="10" viewBox="0 0 22 12" fill="none" stroke="#111" stroke-width="1.4"><polyline points="1 1 11 11 21 1"></polyline></svg>
+    </a>
+  </section>
+
+  <!-- ② 스크롤 아래 : PW 모바일 스타일 (1열 목록, 상단 작은 로고) -->
+  <div id="posts-m" style="position: sticky; top: 0; display: flex; justify-content: space-between; align-items: center; padding: 6px 12px; background: rgba(255,255,255,0.95); font-size: 10px; text-transform: uppercase; letter-spacing: 0.04em">
+    <span style="font-weight: 600; text-transform: none; font-size: 15px; letter-spacing: -0.03em">slow days</span>
+    <button aria-label="메뉴 열기" style="width: 44px; height: 44px; border: 0; background: transparent; padding: 0; display: flex; align-items: center; justify-content: center">
+      <svg aria-hidden="true" width="22" height="12" viewBox="0 0 22 12" fill="none" stroke="#111" stroke-width="1.3"><line x1="0" y1="1" x2="22" y2="1"></line><line x1="0" y1="11" x2="22" y2="11"></line></svg>
+    </button>
+  </div>
+
+  <main style="padding: 40px 20px 0; display: flex; flex-direction: column; gap: 64px">
+    <sc-for list="{{posts}}" as="p" hint-placeholder-count="3">
+      <a href="#posts-m" style="display: flex; flex-direction: column; align-items: center; text-align: center">
+        <div style="width: 100%; aspect-ratio: 1 / 1; display: flex; align-items: center; justify-content: center">
+          <div style="width: {{p.iw}}; height: {{p.ih}}; background: {{p.tone}}; padding: 10px; box-sizing: border-box; font-size: 10px; color: #4A4740; text-align: left">[사진]</div>
+        </div>
+        <h2 style="margin: 8px 0 0; font-size: 22px; line-height: 1.15; font-weight: 400; text-transform: uppercase">{{p.en}}<br>{{p.ko}}</h2>
+        <p style="margin: 12px 0 0; font-size: 11px; line-height: 1.5">{{p.type}} by [작성자]<br>[발행일]</p>
+      </a>
+    </sc-for>
+
+    <figure style="margin: 24px 0; text-align: center">
+      <blockquote style="margin: 0; font-family: 'Noto Serif KR', serif; font-size: 21px; line-height: 1.45">“[글에서 가장 마음에 남는 한 문장을 이곳에 넣습니다.]”</blockquote>
+      <figcaption style="margin-top: 14px; font-size: 10px; line-height: 1.6; text-transform: uppercase; letter-spacing: 0.04em">[인용한 글 제목]<br><span style="text-transform: none">Essay by [작성자] · [발행일]</span></figcaption>
+    </figure>
+
+    <sc-for list="{{posts2}}" as="p" hint-placeholder-count="2">
+      <a href="#posts-m" style="display: flex; flex-direction: column; align-items: center; text-align: center">
+        <div style="width: 100%; aspect-ratio: 1 / 1; display: flex; align-items: center; justify-content: center">
+          <div style="width: {{p.iw}}; height: {{p.ih}}; background: {{p.tone}}; padding: 10px; box-sizing: border-box; font-size: 10px; color: #4A4740; text-align: left">[사진]</div>
+        </div>
+        <h2 style="margin: 8px 0 0; font-size: 22px; line-height: 1.15; font-weight: 400; text-transform: uppercase">{{p.en}}<br>{{p.ko}}</h2>
+        <p style="margin: 12px 0 0; font-size: 11px; line-height: 1.5">{{p.type}} by [작성자]<br>[발행일]</p>
+      </a>
+    </sc-for>
+
+    <a href="#posts-m" style="position: relative; display: block; aspect-ratio: 4 / 5; background: #E4DED3; padding: 12px; box-sizing: border-box; font-size: 10px; color: #4A4740">[추천 · 협업 배너]
+      <span style="position: absolute; right: 6px; bottom: 6px; background: #111; color: #FFF; font-size: 8px; letter-spacing: 0.06em; padding: 2px 5px; text-transform: uppercase">Recommended</span>
+    </a>
+
+    <div>
+      <p style="margin: 0; font-size: 19px; line-height: 1.38">slow days는 빨리 지나가는 하루를 천천히 다시 보는 생활 기록입니다. 에세이, 일상, 공간, 책을 통해 오래 곁에 두고 싶은 장면을 모읍니다.</p>
+      <a href="#posts-m" style="display: inline-flex; align-items: center; margin-top: 20px; min-height: 44px; font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.04em; border-bottom: 1px solid #111">Join the Newsletter · 뉴스레터 구독 →</a>
+    </div>
+
+    <footer style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; padding: 40px 0 32px; font-size: 10px; line-height: 1.7; text-transform: uppercase; letter-spacing: 0.04em">
+      <nav aria-label="소개" style="display: flex; flex-direction: column"><a href="#posts-m">About 소개</a><a href="#posts-m">Writer 작성자</a><a href="#posts-m">Contact 협업 문의</a></nav>
+      <nav aria-label="채널" style="display: flex; flex-direction: column"><a href="#posts-m">Newsletter</a><a href="https://instagram.com">Instagram</a><a href="#posts-m">Archive</a></nav>
+      <nav aria-label="정책" style="display: flex; flex-direction: column"><a href="#posts-m">Privacy 개인정보처리방침</a></nav>
+      <p style="margin: 0"><strong style="font-weight: 600">slow days</strong><br>느리게 보는 생활 기록</p>
+    </footer>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"accent":{"editor":"color","default":"#6B6B6B","options":["#6B6B6B","#B4552D","#2F5D50","#1F3A93"]},"$preview":{"width":390,"height":5400}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      accent: this.props.accent ?? '#6B6B6B',
+      strip: [
+        { title: '창가의 오후', cat: '일상', w: 300, h: 370, mt: 0, tone: '#D9D4CC' },
+        { title: '작은 서재', cat: '공간', w: 300, h: 300, mt: 90, tone: '#C9CFC8' },
+        { title: '11월의 책', cat: '책', w: 300, h: 370, mt: 0, tone: '#E4DED3' }
+      ],
+      posts: [
+        { en: 'Things I Keep', ko: '오래 곁에 두는 물건들', type: 'Essay', iw: '100%', ih: '64%', tone: '#E4DED3' },
+        { en: 'A Room With Light', ko: '빛이 드는 방', type: 'Space', iw: '72%', ih: '100%', tone: '#C9CFC8' },
+        { en: 'Notes From Sunday', ko: '일요일의 메모', type: 'Daily', iw: '100%', ih: '78%', tone: '#BFC3C7' }
+      ],
+      posts2: [
+        { en: 'Reading Slowly', ko: '천천히 읽는 연습', type: 'Books', iw: '76%', ih: '100%', tone: '#D9D4CC' },
+        { en: 'Doors Open, Close', ko: '열리고 닫히는 문', type: 'Essay', iw: '100%', ih: '74%', tone: '#E2CFCB' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>
