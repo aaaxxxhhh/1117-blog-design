@@ -115,7 +115,11 @@ export function photo(p, i, label = "[사진]") {
   const src = safeSrc(p && (p.coverThumb || p.coverUrl));
   return `<div class="ph" style="--tone:${tone}">${src ? `<img src="${esc(src)}" alt="${esc(p.titleKo || p.titleEn || "")}" loading="lazy">` : label}</div>`;
 }
-export function shapeVars(i) { const s = SHAPES[i % SHAPES.length]; return `--w:${s[0]};--h:${s[1]}`; }
+export function shapeVars(i) {
+  const s = SHAPES[i % SHAPES.length], land = s[0] === "100%";
+  // 메인 3열(비율) + 글 목록 4열(PW /articles 실제 크기: 가로 146×97 · 세로 85×127 / 태블릿 125×83 · 75×113)
+  return `--w:${s[0]};--h:${s[1]};--lw:${land ? 146 : 85}px;--lh:${land ? 97 : 127}px;--tw:${land ? 125 : 75}px;--th:${land ? 83 : 113}px`;
+}
 export function cardHTML(p, i, base, tag = "h2") {
   return `<a class="card" href="${base}post/?id=${encodeURIComponent(p.id)}">
     <div class="frame" style="${shapeVars(i)}">${photo(p, i)}</div>
@@ -126,7 +130,7 @@ export function sideHTML(base, active) {
   const items = [["", "All 전체 글"], ...Object.entries(CATS)];
   return `<aside class="side"><nav aria-label="카테고리">${items.map(([k, v]) =>
     `<a href="${base}list/${k ? "?cat=" + k : ""}" class="${active === k ? "on" : ""}">${v}</a>`).join("")}
-    <a href="${base}list/?search=1" style="margin-top:12px">Search 검색</a></nav>
+    <a href="${base}list/?search=1" class="gap">Search 검색</a></nav>
     <a class="brand" href="${base}"><strong>slow days</strong><span><br>느리게 보는 생활 기록</span></a></aside>`;
 }
 
