@@ -17,7 +17,7 @@ const ok = /^G-[A-Z0-9]{4,}$/.test(GA_ID) && !internal;
 
 // 화면 종류: home / list / content
 const path = location.pathname;
-export const PAGE_TYPE = /\/post\/?$/.test(path) ? "content" : /\/list\/?$/.test(path) ? "list" : "home";
+export const PAGE_TYPE = /\/(post|p\/[^/]+)\/?$/.test(path) ? "content" : /\/list\/?$/.test(path) ? "list" : "home";
 
 if (ok) {
   const s = document.createElement("script");
@@ -72,8 +72,10 @@ document.addEventListener("click", (e) => {
   try { url = new URL(a.getAttribute("href"), location.href); } catch { return; }
   if (url.origin !== location.origin) return; // 외부 링크는 GA 자동 수집(click)
   const loc = locOf(a);
-  if (/\/post\/?$/.test(url.pathname) && url.searchParams.get("id")) {
-    track("select_content", { content_type: "post", item_id: url.searchParams.get("id"), click_location: loc });
+  const pm = url.pathname.match(/\/p\/([^/]+)\/?$/);
+  const postId = (/\/post\/?$/.test(url.pathname) && url.searchParams.get("id")) || (pm && decodeURIComponent(pm[1]));
+  if (postId) {
+    track("select_content", { content_type: "post", item_id: postId, click_location: loc });
   } else if (/\/list\/?$/.test(url.pathname) && !url.searchParams.get("search") && (loc === "side_menu" || loc === "list_chip")) {
     track("select_category", { category: url.searchParams.get("cat") || "all", click_location: loc });
   }
