@@ -70,8 +70,8 @@ textarea.box-in { padding:10px; line-height:1.6; resize:vertical; }
 .side .brand { position:absolute; left:24px; bottom:15px; white-space:nowrap; font-weight:500; }
 .with-side { padding-left:133px; padding-right:24px; }
 @media (max-width:1023px) {
-  .side { position:sticky; top:0; height:auto; width:auto; display:flex; align-items:center; gap:16px; padding:10px var(--pw-pad); background:rgba(255,255,255,.96); overflow-x:auto; font-size:var(--pw-meta); }
-  .side nav { position:static; transform:none; flex-direction:row; gap:14px; }
+  .side { position:sticky; top:0; height:auto; width:auto; display:flex; align-items:center; gap:16px; padding:10px var(--pw-pad); background:rgba(255,255,255,.96); flex-wrap:wrap; row-gap:6px; font-size:var(--pw-meta); }
+  .side nav { position:static; transform:none; flex-direction:row; flex-wrap:wrap; gap:6px 14px; }
   .side nav a.gap { margin-top:0; }
   .side .brand { position:static; order:-1; }
   .side .brand span { display:none; }
@@ -89,8 +89,8 @@ textarea.box-in { padding:10px; line-height:1.6; resize:vertical; }
 @media (max-width:640px)  { .grid3 { grid-template-columns:1fr; gap:64px; } .card .frame { aspect-ratio:3/2; } }
 
 /* ---------- PW 글 목록 4열 (/articles : 194px 칸 · 사진 146×97 / 85×127) ---------- */
-.grid4 { display:grid; grid-template-columns:repeat(4,194px); gap:110px 24px; justify-content:end; }
-.grid4 .card .frame { width:146px; height:127px; aspect-ratio:auto; align-items:flex-start; }
+.grid4 { display:grid; grid-template-columns:repeat(4,minmax(0,194px)); gap:110px 24px; justify-content:end; }
+.grid4 .card .frame { width:146px; max-width:100%; height:127px; aspect-ratio:auto; align-items:flex-start; }
 .grid4 .card .frame .ph { width:var(--lw,146px); height:var(--lh,97px); }
 .grid4 .card h2 { margin-top:30px; font-size:var(--pw-list-title); line-height:1.4; }
 .grid4 .card p { margin-top:12px; font-size:var(--pw-list-meta); }
@@ -104,3 +104,9 @@ textarea.box-in { padding:10px; line-height:1.6; resize:vertical; }
 /* ---------- 관리자 표 ---------- */
 .tbl-row { display:grid; grid-template-columns:2.4fr 1fr 1fr 1.1fr 1.2fr; gap:12px; min-height:52px; align-items:center; border-bottom:1px solid var(--line); min-width:720px; }
 .tbl-head { min-height:0; padding:10px 0; border-bottom:1px solid var(--ink); text-transform:uppercase; color:var(--sub); }
+@media (max-width:1199px) {
+  .tbl-row { display:flex; flex-wrap:wrap; align-items:center; gap:6px 14px; min-width:0; padding:12px 0; }
+  .tbl-row > :first-child { flex:1 0 100%; min-width:0; overflow-wrap:anywhere; }
+  .tbl-row > :last-child { margin-left:auto; }
+  .tbl-head { display:none; }
+}
