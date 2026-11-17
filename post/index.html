@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>글 — slow days</title>
+<meta name="description" content="slow days — 느리게 보는 생활 기록">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600&family=Noto+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@400&family=IBM+Plex+Mono&display=swap">
 <link rel="stylesheet" href="../assets/style.css?v=5">
@@ -69,9 +70,19 @@
 <div class="foot" id="foot"></div>
 
 <script type="module">
-import { pageView, track, watchReading, shareUrl } from "../assets/ga.js?v=2";
+import { pageView, track, watchReading, shareUrl } from "../assets/ga.js?v=3";
 import { getPost, getPublished, sideHTML, esc, fmtDate, renderBody, cardHTML, photo, hydrateImages, CAT_EN } from "../assets/fb.js?v=4";
-const id = new URLSearchParams(location.search).get("id");
+const qs = new URLSearchParams(location.search);
+const staticId = document.documentElement.dataset.postId || "";
+const id = staticId || qs.get("id");
+// 예전 주소(post/?id=)로 들어오면, 검색·공유용 글 페이지(p/글번호/)가 만들어져 있을 때 그 주소로 이동
+if (!staticId && id) {
+  try {
+    const target = `../p/${encodeURIComponent(id)}/`;
+    const r = await fetch(target, { method: "HEAD", cache: "no-store" });
+    if (r.ok) { qs.delete("id"); const rest = qs.toString(); location.replace(target + (rest ? "?" + rest : "") + location.hash); await new Promise(() => {}); }
+  } catch {}
+}
 let p = null;
 try { p = id ? await getPost(id) : null; } catch (e) { console.error(e); }
 document.getElementById("side").outerHTML = sideHTML("../", p ? p.category : "");
@@ -81,6 +92,7 @@ if (!p) {
   art.innerHTML = `<p class="empty">글을 찾을 수 없어요. <a href="../list/" style="text-decoration:underline">글 목록으로 가기</a></p>`;
 } else {
   document.title = `${p.titleKo || p.titleEn} — slow days`;
+  const md = document.querySelector('meta[name="description"]'); if (md && !staticId) md.content = String(p.intro || "").replace(/\s+/g, " ").slice(0, 120);
   const intro = String(p.intro || "").split(/\n{2,}/).filter(Boolean).map((t) => `<p>${esc(t)}</p>`).join("");
   art.innerHTML = `
     <header class="head"><h1>${esc(p.titleEn)}</h1><p class="ko">${esc(p.titleKo)}</p>
