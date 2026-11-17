@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>블로그 메인 · 데스크톱</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600&amp;family=Noto+Sans+KR:wght@400;500;700&amp;family=Noto+Serif+KR:wght@400;500&amp;display=swap">
+<style>
+body{margin:0;background:#FFFFFF}
+a{color:#111111;text-decoration:none}a:hover{color:#5A5A5A}
+</style>
+</helmet>
+<div style="font-family: 'Inter Tight', 'Noto Sans KR', sans-serif; color: #111111; background: #FFFFFF; letter-spacing: 0.01em; width: 100%; min-height: 100vh">
+
+  <!-- ① 첫 화면 : WSM 스타일 (작은 아이콘 바 + 큰 소문자 로고 + 엇갈린 가로 이미지 띠) -->
+  <section aria-label="첫 화면" style="position: relative; min-height: 1040px; overflow: hidden">
+    <header style="display: flex; justify-content: space-between; align-items: center; padding: 16px 24px; flex-wrap: wrap; gap: 12px">
+      <nav aria-label="빠른 메뉴" style="display: flex; align-items: center; gap: 4px">
+        <button aria-label="메뉴 열기" style="width: 44px; height: 44px; border: 0; background: transparent; padding: 0; display: flex; align-items: center; justify-content: center; cursor: pointer">
+          <svg aria-hidden="true" width="20" height="14" viewBox="0 0 20 14" fill="none" stroke="#111" stroke-width="1.3"><line x1="0" y1="1" x2="20" y2="1"></line><line x1="0" y1="7" x2="20" y2="7"></line><line x1="0" y1="13" x2="20" y2="13"></line></svg>
+        </button>
+        <button aria-label="검색" style="width: 44px; height: 44px; border: 0; background: transparent; padding: 0; display: flex; align-items: center; justify-content: center; cursor: pointer">
+          <svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="17" y1="17" x2="22" y2="22"></line></svg>
+        </button>
+      </nav>
+      <a href="#posts" style="display: flex; align-items: center; gap: 8px; font-size: 12px; min-height: 44px"><span aria-hidden="true" style="width: 5px; height: 5px; border-radius: 50%; background: {{accent}}"></span>Seoul · 에세이</a>
+    </header>
+
+    <h1 style="margin: 0; padding: 72px 0 0 300px; font-size: 88px; line-height: 0.9; font-weight: 600; letter-spacing: -0.045em">slow days</h1>
+
+    <div style="position: absolute; left: -380px; top: 340px; display: flex; gap: 30px; align-items: flex-start; white-space: nowrap">
+      <sc-for list="{{strip}}" as="item" hint-placeholder-count="7">
+        <a href="#posts" style="flex: 0 0 auto; width: {{item.w}}px; margin-top: {{item.mt}}px; display: flex; flex-direction: column; align-items: center; gap: 22px">
+          <div style="width: 100%; height: {{item.h}}px; background: {{item.tone}}; padding: 12px; box-sizing: border-box; font-size: 10px; color: #4A4740">[사진]</div>
+          <span style="font-size: 12px">{{item.title}} - {{item.cat}}</span>
+        </a>
+      </sc-for>
+    </div>
+
+    <div style="position: absolute; left: 0; right: 0; bottom: 24px; display: flex; justify-content: center">
+      <a href="#posts" aria-label="아래로 이동" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center">
+        <svg aria-hidden="true" width="20" height="11" viewBox="0 0 22 12" fill="none" stroke="#111" stroke-width="1.3"><polyline points="1 1 11 11 21 1"></polyline></svg>
+      </a>
+    </div>
+  </section>
+
+  <!-- ② 스크롤 아래 : PW 스타일 (왼쪽 고정 작은 메뉴 + 3열 글 목록) -->
+  <div id="posts" style="display: flex; flex-wrap: wrap; align-items: flex-start">
+
+    <aside style="flex: 1 1 120px; max-width: 133px; position: sticky; top: 0; height: 100vh; min-height: 520px; display: flex; flex-direction: column; justify-content: space-between; padding: 0 0 20px 14px; box-sizing: border-box; font-size: 10px; line-height: 1.5; text-transform: uppercase; letter-spacing: 0.04em">
+      <nav aria-label="카테고리" style="display: flex; flex-direction: column; padding-top: 42vh">
+        <a href="#posts">Essay 에세이</a>
+        <a href="#posts">Daily 일상</a>
+        <a href="#posts">Space 공간</a>
+        <a href="#posts">Books 책</a>
+        <a href="#posts" style="margin-top: 12px">Search 검색</a>
+      </nav>
+      <p style="margin: 0"><strong style="font-weight: 600">slow days</strong><br>느리게 보는 생활 기록</p>
+    </aside>
+
+    <main style="flex: 999 1 560px; min-width: 0; padding: 96px 24px 0 0; box-sizing: border-box">
+
+      <!-- 3열 글 행 1 -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 80px 24px; max-width: 1284px">
+        <sc-for list="{{row1}}" as="p" hint-placeholder-count="3">
+          <a href="#posts" style="display: flex; flex-direction: column; align-items: center; text-align: center">
+            <div style="width: 100%; aspect-ratio: 1 / 1; display: flex; align-items: flex-start; justify-content: center">
+              <div style="width: {{p.iw}}; height: {{p.ih}}; background: {{p.tone}}; padding: 10px; box-sizing: border-box; font-size: 10px; color: #4A4740; text-align: left">[사진]</div>
+            </div>
+            <h2 style="margin: 4px 0 0; font-size: 27px; line-height: 1.12; font-weight: 400; text-transform: uppercase">{{p.en}}<br>{{p.ko}}</h2>
+            <p style="margin: 14px 0 0; font-size: 11px; line-height: 1.5">{{p.type}} by [작성자]<br>[발행일]</p>
+          </a>
+        </sc-for>
+      </div>
+
+      <!-- 인용구 (세리프) -->
+      <figure style="margin: 0; padding: 150px 0 140px; text-align: center; max-width: 1284px">
+        <blockquote style="margin: 0 auto; max-width: 900px; font-family: 'Noto Serif KR', serif; font-size: 30px; line-height: 1.4; font-weight: 400">“[글에서 가장 마음에 남는 한 문장을 이곳에 넣습니다.]”</blockquote>
+        <figcaption style="margin-top: 18px; font-size: 10px; line-height: 1.6; text-transform: uppercase; letter-spacing: 0.04em">[인용한 글 제목]<br><span style="text-transform: none">Essay by [작성자] · [발행일]</span></figcaption>
+      </figure>
+
+      <!-- 3열 글 행 2 -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 80px 24px; max-width: 1284px">
+        <sc-for list="{{row2}}" as="p" hint-placeholder-count="3">
+          <a href="#posts" style="display: flex; flex-direction: column; align-items: center; text-align: center">
+            <div style="width: 100%; aspect-ratio: 1 / 1; display: flex; align-items: center; justify-content: center">
+              <div style="width: {{p.iw}}; height: {{p.ih}}; background: {{p.tone}}; padding: 10px; box-sizing: border-box; font-size: 10px; color: #4A4740; text-align: left">[사진]</div>
+            </div>
+            <h2 style="margin: 4px 0 0; font-size: 27px; line-height: 1.12; font-weight: 400; text-transform: uppercase">{{p.en}}<br>{{p.ko}}</h2>
+            <p style="margin: 14px 0 0; font-size: 11px; line-height: 1.5">{{p.type}} by [작성자]<br>[발행일]</p>
+          </a>
+        </sc-for>
+      </div>
+
+      <!-- 가운데 단독 글 -->
+      <a href="#posts" style="display: flex; flex-direction: column; align-items: center; text-align: center; padding-top: 140px; max-width: 1284px">
+        <div style="width: min(100%, 412px); aspect-ratio: 1 / 1; background: #D6CEC4; padding: 10px; box-sizing: border-box; font-size: 10px; color: #4A4740">[사진]</div>
+        <h2 style="margin: 4px 0 0; font-size: 27px; line-height: 1.12; font-weight: 400; text-transform: uppercase; max-width: 520px">The Promise of Rest<br>쉬는 일에 대하여</h2>
+        <p style="margin: 14px 0 0; font-size: 11px; line-height: 1.5">Essay by [작성자]<br>[발행일]</p>
+      </a>
+
+      <!-- 추천·협업 3칸 (PW 광고 영역 자리) -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 24px; max-width: 1284px; padding-top: 150px">
+        <sc-for list="{{recs}}" as="r" hint-placeholder-count="3">
+          <a href="#posts" style="position: relative; display: block; aspect-ratio: 4 / 5; background: {{r.tone}}; padding: 12px; box-sizing: border-box; font-size: 10px; color: #4A4740">[{{r.label}}]
+            <span style="position: absolute; right: 6px; bottom: 6px; background: #111; color: #FFF; font-size: 7px; letter-spacing: 0.06em; padding: 2px 5px; text-transform: uppercase">Recommended</span>
+          </a>
+        </sc-for>
+      </div>
+
+      <!-- 블로그 소개 문단 -->
+      <div style="padding: 120px 0 0; max-width: 1284px">
+        <p style="margin: 0; font-size: 24px; line-height: 1.32; font-weight: 400">slow days는 빨리 지나가는 하루를 천천히 다시 보는 생활 기록입니다. 에세이, 일상, 공간, 책을 통해 오래 곁에 두고 싶은 장면을 모읍니다.</p>
+        <a href="#newsletter" id="newsletter" style="display: inline-flex; align-items: center; gap: 8px; margin-top: 28px; min-height: 44px; font-size: 13px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.04em; border-bottom: 1px solid #111">Join the Newsletter · 뉴스레터 구독하기 →</a>
+      </div>
+
+      <!-- 가운데 단독 글 (롱리드) -->
+      <a href="#posts" style="display: flex; flex-direction: column; align-items: center; text-align: center; padding: 140px 0 0; max-width: 1284px">
+        <div style="width: min(100%, 412px); aspect-ratio: 4 / 3; background: #5E5A53; padding: 10px; box-sizing: border-box; font-size: 10px; color: #F2F0EC; text-align: left">[사진]</div>
+        <h2 style="margin: 120px 0 0; font-size: 27px; line-height: 1.12; font-weight: 400; text-transform: uppercase; max-width: 560px">A Quiet Defence of Small Days<br>작은 하루를 위한 변명</h2>
+        <p style="margin: 14px 0 0; font-size: 11px; line-height: 1.5">Long Read by [작성자]<br>[발행일]</p>
+      </a>
+
+      <!-- 푸터 : PW 스타일 (작은 대문자 링크 4묶음) -->
+      <footer style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 24px; padding: 160px 0 24px; max-width: 1284px; font-size: 10px; line-height: 1.6; text-transform: uppercase; letter-spacing: 0.04em">
+        <nav aria-label="소개" style="display: flex; flex-direction: column"><a href="#posts">About 소개</a><a href="#posts">Writer 작성자</a><a href="#posts">Contact 협업 문의</a></nav>
+        <nav aria-label="정책" style="display: flex; flex-direction: column"><a href="#posts">Privacy 개인정보처리방침</a><a href="#posts">Guide 이용 안내</a></nav>
+        <nav aria-label="채널" style="display: flex; flex-direction: column"><a href="#newsletter">Newsletter 뉴스레터</a><a href="https://instagram.com">Instagram</a></nav>
+        <nav aria-label="보관함" style="display: flex; flex-direction: column"><a href="#posts">Archive 아카이브</a><a href="#posts">Back to top ↑</a></nav>
+      </footer>
+    </main>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"accent":{"editor":"color","default":"#6B6B6B","options":["#6B6B6B","#B4552D","#2F5D50","#1F3A93"]},"$preview":{"width":1440,"height":6600}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      accent: this.props.accent ?? '#6B6B6B',
+      strip: [
+        { title: '유리컵', cat: '일상', w: 330, h: 413, mt: 154, tone: '#E2CFCB' },
+        { title: '창가의 오후', cat: '일상', w: 330, h: 427, mt: 0, tone: '#D9D4CC' },
+        { title: '작은 서재', cat: '공간', w: 690, h: 479, mt: 121, tone: '#C9CFC8' },
+        { title: '11월의 책', cat: '책', w: 330, h: 413, mt: 0, tone: '#E4DED3' },
+        { title: '비 오는 골목', cat: '사진', w: 330, h: 495, mt: 113, tone: '#BFC3C7' },
+        { title: '혼자 먹는 저녁', cat: '에세이', w: 690, h: 479, mt: 121, tone: '#D6CEC4' },
+        { title: '주말 시장', cat: '일상', w: 330, h: 427, mt: 0, tone: '#CCD2CB' }
+      ],
+      row1: [
+        { en: 'Things I Keep', ko: '오래 곁에 두는 물건들', type: 'Essay', iw: '100%', ih: '64%', tone: '#E4DED3' },
+        { en: 'A Room With Light', ko: '빛이 드는 방', type: 'Space', iw: '72%', ih: '100%', tone: '#C9CFC8' },
+        { en: 'Notes From Sunday', ko: '일요일의 메모', type: 'Daily', iw: '100%', ih: '78%', tone: '#BFC3C7' }
+      ],
+      row2: [
+        { en: 'Reading Slowly', ko: '천천히 읽는 연습', type: 'Books', iw: '76%', ih: '100%', tone: '#D9D4CC' },
+        { en: 'Doors Open, Close', ko: '열리고 닫히는 문', type: 'Essay', iw: '100%', ih: '74%', tone: '#E2CFCB' },
+        { en: 'Walking Home', ko: '집으로 걷는 길', type: 'Daily', iw: '86%', ih: '100%', tone: '#CCD2CB' }
+      ],
+      recs: [
+        { label: '추천 책 · 협업 배너', tone: '#E4DED3' },
+        { label: '추천 공간 · 협업 배너', tone: '#C9CFC8' },
+        { label: '추천 물건 · 협업 배너', tone: '#D6CEC4' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>
