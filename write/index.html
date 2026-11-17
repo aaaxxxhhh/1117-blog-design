@@ -109,6 +109,7 @@ const F = ["titleEn", "titleKo", "category", "author", "coverCredit", "intro", "
 let cover = { id: "", thumb: "", file: null };
 
 onUser(async (user) => {
+  if (user) { try { localStorage.setItem("sd_internal", "1"); } catch {} } // GA 내부 방문 제외 표시
   if (!user) { location.replace("../admin/"); return; }
   if (id) {
     const p = await getPost(id).catch(() => null);
