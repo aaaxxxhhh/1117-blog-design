@@ -6,13 +6,16 @@
 <title>글 — slow days</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600&family=Noto+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@400&family=IBM+Plex+Mono&display=swap">
-<link rel="stylesheet" href="../assets/style.css?v=4">
+<link rel="stylesheet" href="../assets/style.css?v=5">
 <style>
   /* PW 글 상세와 같은 크기·위치 (1440px: 제목 27.424px · 대표 사진 36.2vw · 도입 17.6px 세리프 · 본문 14.4px 28.6vw) */
-  .top-logo { position:fixed; left:0; right:0; top:16px; height:24px; display:flex; justify-content:center; z-index:6; pointer-events:none; }
-  .top-logo a { pointer-events:auto; font-size:16px; font-weight:600; letter-spacing:-.04em; }
+  /* 상단 로고: 영문+한글 제목 두 줄과 같은 높이(제목 크기 × 2) · 모든 글 상세에서 같은 위치에 고정 */
+  :root { --logo-fs:calc(var(--pw-title) * 2); --logo-h:calc(var(--logo-fs) + 32px); }
+  body { padding-top:var(--logo-h); }
+  .top-logo { position:fixed; left:0; right:0; top:0; height:var(--logo-h); display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,.96); z-index:6; }
+  .top-logo a { font-size:var(--logo-fs); line-height:1; font-weight:600; letter-spacing:-.045em; white-space:nowrap; }
   article { padding:0 24px; }
-  .head { text-align:center; padding-top:80px; }
+  .head { text-align:center; padding-top:56px; }
   .head h1, .head .ko { margin:0; font-size:var(--pw-title); line-height:1; font-weight:400; text-transform:uppercase; }
   .head .by { margin:25px 0 0; font-size:var(--pw-meta); line-height:1.4; }
   .col { margin:0 auto; width:36.2vw; }
@@ -33,19 +36,19 @@
   .share a, .share button { display:flex; align-items:center; min-height:32px; border:0; background:none; padding:0; cursor:pointer; text-transform:inherit; font-size:inherit; }
   .more { margin-top:200px; }
   .more h2.t { margin:0 0 56px; text-align:center; font-size:var(--pw-meta); font-weight:400; text-transform:uppercase; }
-  .side .brand { bottom:44px; }
-  .foot { position:sticky; bottom:0; margin-top:160px; display:flex; justify-content:space-between; gap:16px; padding:10px 24px; background:rgba(255,255,255,.96); font-family:var(--mono); font-size:var(--pw-side); text-transform:uppercase; flex-wrap:wrap; }
+  .foot { margin-top:160px; display:flex; justify-content:space-between; gap:6px 16px; padding:14px 24px max(20px, env(safe-area-inset-bottom)) 133px; border-top:1px solid var(--line, #E0DEDA); font-family:var(--mono); font-size:var(--pw-side); line-height:1.5; text-transform:uppercase; flex-wrap:wrap; }
+  .foot span { min-width:0; overflow-wrap:anywhere; }
   @media (max-width:1023px) {
-    .top-logo { display:none; }
+    .side { top:var(--logo-h); z-index:5; }
     article { padding:0 var(--pw-pad); }
-    .head { padding-top:44px; }
+    .head { padding-top:40px; }
     .cover { margin:44px 0 0 26.3vw; width:39.3vw; }
     .col { margin-left:26.3vw; margin-right:0; width:47.5vw; }
     .intro { font-size:17px; }
     .body { margin:48px 0 0 26.3vw; width:47.5vw; padding-left:0; font-size:15.3px; }
     .body blockquote { margin:72px 0 72px -26.3vw; width:calc(100vw - 26px); }
     .body figure.spread { margin-left:-26.3vw; width:calc(100vw - 26px); }
-    .foot { padding:10px var(--pw-pad); }
+    .foot { padding:14px var(--pw-pad) max(20px, env(safe-area-inset-bottom)); }
   }
   @media (max-width:640px) {
     .head { padding-top:30px; }
@@ -66,6 +69,7 @@
 <div class="foot" id="foot"></div>
 
 <script type="module">
+import { pageView } from "../assets/ga.js?v=1";
 import { getPost, getPublished, sideHTML, esc, fmtDate, renderBody, cardHTML, photo, hydrateImages, CAT_EN } from "../assets/fb.js?v=4";
 const id = new URLSearchParams(location.search).get("id");
 let p = null;
@@ -73,6 +77,7 @@ try { p = id ? await getPost(id) : null; } catch (e) { console.error(e); }
 document.getElementById("side").outerHTML = sideHTML("../", p ? p.category : "");
 const art = document.getElementById("art");
 if (!p) {
+  pageView({ post_id: id || "", not_found: true });
   art.innerHTML = `<p class="empty">글을 찾을 수 없어요. <a href="../list/" style="text-decoration:underline">글 목록으로 가기</a></p>`;
 } else {
   document.title = `${p.titleKo || p.titleEn} — slow days`;
@@ -88,6 +93,7 @@ if (!p) {
   if (p.coverId) art.querySelector(".cover .ph").innerHTML = `<img data-img="${esc(p.coverId)}" alt="${esc(p.titleKo || p.titleEn)}">`;
   hydrateImages(art);
   document.getElementById("copy").onclick = async (e) => { try { await navigator.clipboard.writeText(location.href); e.target.textContent = "복사했어요"; } catch { e.target.textContent = "복사 실패"; } };
+  pageView({ post_id: id, post_category: p.category });
   document.getElementById("foot").innerHTML = `<span>${esc(CAT_EN[p.category] || "")}</span><span>${esc(p.titleEn)} · ${esc(p.titleKo)}</span><span>${fmtDate(p.publishedAt)}</span>`;
 }
 try {
