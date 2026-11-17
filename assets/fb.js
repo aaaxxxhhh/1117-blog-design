@@ -28,7 +28,15 @@ const SHAPES = [["100%", "64%"], ["72%", "100%"], ["100%", "78%"], ["76%", "100%
 const toMs = (t) => (t && t.toMillis ? t.toMillis() : 0);
 export const byNewest = (a, b) => toMs(b.publishedAt || b.createdAt) - toMs(a.publishedAt || a.createdAt);
 
+// 검색·공유용 글 페이지(p/글번호/)가 만들어진 글 번호 목록 (자동 배포 때 p/ids.json 생성)
+const BUILT = new Set();
+const builtReady = fetch(new URL("../p/ids.json", import.meta.url), { cache: "no-cache" })
+  .then((r) => (r.ok ? r.json() : [])).then((a) => a.forEach((x) => BUILT.add(x))).catch(() => {});
+// 글 주소: 페이지가 만들어진 글은 대표 주소(p/글번호/), 아직이면 예전 주소(post/?id=)
+export const postHref = (p, base) => (BUILT.has(p.id) ? `${base}p/${encodeURIComponent(p.id)}/` : `${base}post/?id=${encodeURIComponent(p.id)}`);
+
 export async function getPublished() {
+  await builtReady;
   const snap = await getDocs(query(posts, where("status", "==", "published")));
   const now = Date.now();
   return snap.docs.map((d) => ({ id: d.id, ...d.data() }))
@@ -121,7 +129,7 @@ export function shapeVars(i) {
   return `--w:${s[0]};--h:${s[1]};--lw:${land ? 146 : 85}px;--lh:${land ? 97 : 127}px;--tw:${land ? 125 : 75}px;--th:${land ? 83 : 113}px`;
 }
 export function cardHTML(p, i, base, tag = "h2") {
-  return `<a class="card" href="${base}post/?id=${encodeURIComponent(p.id)}">
+  return `<a class="card" href="${postHref(p, base)}">
     <div class="frame" style="${shapeVars(i)}">${photo(p, i)}</div>
     <${tag}>${esc(p.titleEn)}${p.titleKo ? "<br>" + esc(p.titleKo) : ""}</${tag}>
     <p>${esc(CAT_EN[p.category] || "")} by ${esc(p.author || "")}<br>${fmtDate(p.publishedAt)}</p></a>`;
