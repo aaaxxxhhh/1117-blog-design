@@ -6,7 +6,7 @@
 <title>글 목록 — slow days</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600&family=Noto+Sans+KR:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="../assets/style.css?v=4">
+<link rel="stylesheet" href="../assets/style.css?v=5">
 <style>
   /* PW /articles와 같은 위치·크기 (1440px: 검색창 242~1198px, 버튼 194px, 4열 194px 칸) */
   .bar { position:sticky; top:0; z-index:4; background:#fff; height:44px; font-size:var(--pw-ui); text-transform:uppercase; }
@@ -63,6 +63,8 @@
 
 <script type="module">
 import { getPublished, cardHTML, sideHTML, esc, fmtDate, CATS, CAT_EN } from "../assets/fb.js?v=4";
+import { pageView } from "../assets/ga.js?v=1";
+pageView();
 const qs = new URLSearchParams(location.search);
 const cat = qs.get("cat") || "";
 document.getElementById("side").outerHTML = sideHTML("../", cat);
