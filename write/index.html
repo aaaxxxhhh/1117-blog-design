@@ -16,6 +16,8 @@
   .ed { border:1px solid var(--ink); }
   .ed textarea { width:100%; border:0; padding:16px; resize:vertical; line-height:1.8; font-size:14px; min-height:360px; }
   .cover-prev { aspect-ratio:2/3; width:160px; }
+  .drop { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; min-height:200px; border:1px dashed #8A8A8A; background:#F7F6F4; cursor:pointer; text-align:center; padding:20px; }
+  .drop.over { border-color:var(--ink); background:#EFEDE9; }
   .actions { display:flex; justify-content:flex-end; align-items:center; gap:12px; flex-wrap:wrap; margin:96px 0 0; padding:20px 0; border-top:1px solid var(--ink); }
   footer { padding:60px 28px 32px; font-size:10px; text-transform:uppercase; letter-spacing:.04em; color:var(--sub); }
   [hidden] { display:none !important; }
@@ -49,9 +51,15 @@
     </div></div>
 
     <div class="row2"><p class="lab">대표 사진 Cover</p><div class="fld">
-      <label for="coverUrl" class="hint">사진 주소(URL)를 붙여 넣어 주세요. https:// 로 시작해야 해요. 세로 2:3 사진이 잘 어울려요.</label>
-      <input id="coverUrl" class="line-in" type="url" placeholder="https://">
-      <div class="cover-prev ph" id="coverPrev" style="--tone:#D9D4CC">[미리보기]</div>
+      <label for="coverFile" class="drop" id="drop">
+        <span style="font-weight:600">사진을 끌어다 놓거나 눌러서 고르세요</span>
+        <span class="hint">JPG · PNG · WEBP / 세로 2:3 권장 / 큰 사진은 자동으로 줄여서 저장해요</span>
+      </label>
+      <input id="coverFile" type="file" accept="image/jpeg,image/png,image/webp" class="sr">
+      <div style="display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap">
+        <div class="cover-prev ph" id="coverPrev" style="--tone:#D9D4CC">[미리보기]</div>
+        <button type="button" class="btn" id="coverDel" hidden style="min-height:44px">사진 빼기</button>
+      </div>
       <label for="coverCredit" class="hint" style="margin-top:8px">사진 출처 (사진 아래 작은 글씨로 보여요)</label>
       <input id="coverCredit" class="line-in" placeholder="Photo by ">
     </div></div>
@@ -61,16 +69,17 @@
       <textarea id="intro" class="box-in" rows="4"></textarea>
     </div></div>
 
-    <div class="row2"><p class="lab">본문 Story<span class="hint" style="display:block;font-weight:400;margin-top:8px;max-width:300px">버튼을 누르면 표시가 들어가요.<br>## 소제목 · **굵게** · > 인용구<br>![사진 설명](사진 주소) · [글자](링크 주소)<br>문단 사이는 한 줄을 비워 주세요.</span></p>
+    <div class="row2"><p class="lab">본문 Story<span class="hint" style="display:block;font-weight:400;margin-top:8px;max-width:300px">버튼을 누르면 표시가 들어가요.<br>## 소제목 · **굵게** · > 인용구<br>"사진 넣기"를 누르면 사진 파일을 골라 올려요<br>[글자](링크 주소)<br>문단 사이는 한 줄을 비워 주세요.</span></p>
       <div class="fld ed">
         <div class="tb" role="toolbar" aria-label="본문 꾸미기">
           <button type="button" data-ins="\n\n## 소제목\n\n">소제목</button>
           <button type="button" data-wrap="**">굵게</button>
-          <button type="button" data-ins="\n\n![사진 설명](https://)\n\n">사진 넣기</button>
-          <button type="button" data-ins="\n\n![사진 1](https://) ![사진 2](https://)\n\n">사진 2장 펼침</button>
+          <button type="button" data-up="1">사진 넣기</button>
+          <button type="button" data-up="2">사진 2장 펼침</button>
           <button type="button" data-ins="\n\n> 인용할 문장\n\n">인용구</button>
           <button type="button" data-ins="[링크 글자](https://)">링크</button>
         </div>
+        <input id="bodyFile" type="file" accept="image/jpeg,image/png,image/webp" multiple class="sr" tabindex="-1" aria-hidden="true">
         <label for="body" class="sr">본문</label>
         <textarea id="body" placeholder="이야기를 시작해 보세요."></textarea>
       </div>
@@ -97,10 +106,11 @@
 <footer>© 2026 slow days · 관리자 전용 화면</footer>
 
 <script type="module">
-import { onUser, getPost, savePost, esc, safeUrl, fmtDate } from "../assets/fb.js";
+import { onUser, getPost, savePost, uploadImage, fileToDataURL, getImage, esc, safeSrc, fmtDate } from "../assets/fb.js";
 const $ = (id) => document.getElementById(id);
 let id = new URLSearchParams(location.search).get("id");
-const F = ["titleEn", "titleKo", "category", "author", "coverUrl", "coverCredit", "intro", "body"];
+const F = ["titleEn", "titleKo", "category", "author", "coverCredit", "intro", "body"];
+let cover = { id: "", thumb: "", file: null };
 
 onUser(async (user) => {
   if (!user) { location.replace("../admin/"); return; }
@@ -112,20 +122,51 @@ onUser(async (user) => {
       if (p.publishedAt) $("pubdate").value = fmtDate(p.publishedAt).replaceAll(".", "-");
       $("ttl").textContent = "Edit Story 글 수정";
       $("prevBtn").hidden = false;
-      preview();
+      cover = { id: p.coverId || "", thumb: p.coverThumb || "", file: null };
+      showCover(cover.thumb);
+      if (cover.id) getImage(cover.id).then((d) => d && showCover(d)).catch(() => {});
     } else id = null;
   }
   $("wait").hidden = true; $("f").hidden = false;
 });
 
-function preview() {
-  const u = safeUrl($("coverUrl").value.trim());
+function showCover(src) {
+  const u = safeSrc(src);
   $("coverPrev").innerHTML = u ? `<img src="${esc(u)}" alt="대표 사진 미리보기">` : "[미리보기]";
+  $("coverDel").hidden = !u;
 }
-$("coverUrl").oninput = preview;
+async function pickCover(file) {
+  if (!file || !/^image\/(jpeg|png|webp)$/.test(file.type)) { $("msg").className = "msg err"; $("msg").textContent = "JPG · PNG · WEBP 사진만 올릴 수 있어요."; return; }
+  cover.file = file; cover.thumb = await fileToDataURL(file, 600, 0.72); showCover(cover.thumb);
+  $("msg").className = "msg"; $("msg").textContent = "대표 사진을 골랐어요. 저장할 때 함께 올라가요.";
+}
+$("coverFile").onchange = (e) => pickCover(e.target.files[0]);
+$("coverDel").onclick = () => { cover = { id: "", thumb: "", file: null }; $("coverFile").value = ""; showCover(""); };
+const drop = $("drop");
+["dragenter", "dragover"].forEach((t) => drop.addEventListener(t, (e) => { e.preventDefault(); drop.classList.add("over"); }));
+["dragleave", "drop"].forEach((t) => drop.addEventListener(t, (e) => { e.preventDefault(); drop.classList.remove("over"); }));
+drop.addEventListener("drop", (e) => pickCover(e.dataTransfer.files[0]));
+
+let upCount = 1;
+function insertAtCursor(text) {
+  const t = $("body"), s = t.selectionStart, en = t.selectionEnd, v = t.value;
+  t.value = v.slice(0, s) + text + v.slice(en); t.focus(); t.selectionStart = t.selectionEnd = s + text.length;
+}
+$("bodyFile").onchange = async (e) => {
+  const files = [...e.target.files].slice(0, upCount); e.target.value = "";
+  if (!files.length) return;
+  $("msg").className = "msg"; $("msg").textContent = `사진 ${files.length}장을 올리는 중…`;
+  try {
+    const ids = [];
+    for (const f of files) ids.push(await uploadImage(f));
+    insertAtCursor("\n\n" + ids.map((id, i) => `![사진 설명 ${i + 1}](img:${id})`).join(" ") + "\n\n");
+    $("msg").textContent = "사진을 넣었어요. [사진 설명] 글자는 원하는 설명으로 바꿔 주세요.";
+  } catch (err) { console.error(err); $("msg").className = "msg err"; $("msg").textContent = "사진을 올리지 못했어요. 로그인 상태와 사진 파일을 확인해 주세요."; }
+};
 
 document.querySelector(".tb").onclick = (e) => {
   const b = e.target.closest("button"); if (!b) return;
+  if (b.dataset.up) { upCount = Number(b.dataset.up); $("bodyFile").click(); return; }
   const t = $("body"), s = t.selectionStart, en = t.selectionEnd, v = t.value;
   const ins = b.dataset.wrap ? b.dataset.wrap + (v.slice(s, en) || "굵게 할 글자") + b.dataset.wrap : b.dataset.ins.replace(/\\n/g, "\n");
   t.value = v.slice(0, s) + ins + v.slice(en); t.focus(); t.selectionStart = t.selectionEnd = s + ins.length;
@@ -136,6 +177,9 @@ async function save(status) {
   const data = Object.fromEntries(F.map((k) => [k, $(k).value.trim()]));
   data.tags = $("tags").value.split(",").map((s) => s.trim()).filter(Boolean);
   data.status = status;
+  $("msg").className = "msg"; $("msg").textContent = "저장하는 중…";
+  if (cover.file) { try { cover.id = await uploadImage(cover.file); cover.file = null; } catch (err) { console.error(err); $("msg").className = "msg err"; $("msg").textContent = "대표 사진을 올리지 못했어요."; return; } }
+  data.coverId = cover.id; data.coverThumb = cover.thumb; data.coverUrl = "";
   if ($("pubdate").value) data.publishedAtStr = $("pubdate").value;
   $("msg").className = "msg"; $("msg").textContent = "저장하는 중…";
   ["draftBtn", "pubBtn"].forEach((k) => ($(k).disabled = true));
