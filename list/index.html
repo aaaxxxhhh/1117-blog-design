@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
 <title>글 목록 — slow days</title>
 <meta name="description" content="빨리 지나가는 하루를 천천히 다시 보는 생활 기록. 에세이, 일상, 공간, 책 이야기를 모읍니다.">
 <link rel="canonical" href="https://aaaxxxhhh.github.io/1117-blog-design/list/">
@@ -17,8 +18,9 @@
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600&family=Noto+Sans+KR:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="../assets/style.css?v=5">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600&family=Noto+Sans+KR:wght@400;500;700&display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600&family=Noto+Sans+KR:wght@400;500;700&display=swap"></noscript>
+<link rel="stylesheet" href="../assets/style.css?v=6">
 <style>
   /* PW /articles와 같은 위치·크기 (1440px: 검색창 242~1198px, 버튼 194px, 4열 194px 칸) */
   .bar { position:sticky; top:0; z-index:4; background:#fff; height:44px; font-size:var(--pw-ui); text-transform:uppercase; }
@@ -74,7 +76,7 @@
 </main>
 
 <script type="module">
-import { getPublished, cardHTML, sideHTML, esc, fmtDate, CATS, CAT_EN } from "../assets/fb.js?v=4";
+import { getPublished, cardHTML, sideHTML, esc, fmtDate, CATS, CAT_EN, postHref } from "../assets/fb.js?v=5";
 import { pageView, track } from "../assets/ga.js?v=3";
 pageView();
 const qs = new URLSearchParams(location.search);
@@ -102,22 +104,18 @@ function draw() {
   out.innerHTML = view === "grid"
     ? `<div class="grid4">${list.map((p, i) => cardHTML(p, i, "../")).join("")}</div>`
     : `<div class="idx"><div class="r h"><span>Title 제목</span><span>Type 분류</span><span>Author 작성자</span><span>Date 발행일</span></div>${list.map((p) =>
-        `<a class="r" href="../post/?id=${encodeURIComponent(p.id)}"><span class="upper">${esc(p.titleEn)} · ${esc(p.titleKo)}</span><span>${esc(CAT_EN[p.category] || "")}</span><span>${esc(p.author)}</span><span>${fmtDate(p.publishedAt)}</span></a>`).join("")}</div>`;
+        `<a class="r" href="${postHref(p, "../")}"><span class="upper">${esc(p.titleEn)} · ${esc(p.titleKo)}</span><span>${esc(CAT_EN[p.category] || "")}</span><span>${esc(p.author)}</span><span>${fmtDate(p.publishedAt)}</span></a>`).join("")}</div>`;
 }
 const vGrid = document.getElementById("vGrid"), vIdx = document.getElementById("vIdx");
 vGrid.onclick = () => { view = "grid"; vGrid.classList.add("on"); vIdx.classList.remove("on"); draw(); };
 vIdx.onclick = () => { view = "index"; vIdx.classList.add("on"); vGrid.classList.remove("on"); draw(); };
-// 검색: 검색어를 주소(?q=)에 남기고, 입력이 멈추면 search 이벤트 1회 전송
+// 검색: 입력이 멈추면 search 이벤트 1회 전송 (주소 변경 시 GA가 페이지 조회를 중복 집계하므로 주소는 바꾸지 않음, ?q= 로 들어오면 검색어 자동 입력)
 let timer = 0, sent = qs.get("q") || "";
 q.oninput = () => {
   draw();
   clearTimeout(timer);
   timer = setTimeout(() => {
     const word = q.value.trim();
-    const u = new URL(location.href);
-    u.searchParams.delete("search");
-    if (word) u.searchParams.set("q", word); else u.searchParams.delete("q");
-    history.replaceState(null, "", u.pathname + u.search + u.hash);
     if (word && word !== sent) { sent = word; track("search", { search_term: word, results_count: lastCount }); }
   }, 800);
 };
