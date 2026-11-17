@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>글쓰기 — slow days</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="../assets/style.css">
+<style>
+  form.wrap { padding:40px 28px 0; max-width:1360px; }
+  .rows { display:flex; flex-direction:column; gap:56px; }
+  .tb { display:flex; flex-wrap:wrap; border-bottom:1px solid var(--ink); font-size:11px; text-transform:uppercase; letter-spacing:.04em; }
+  .tb button { min-height:44px; padding:0 14px; border:0; border-right:1px solid #E0DEDA; background:#fff; cursor:pointer; }
+  .ed { border:1px solid var(--ink); }
+  .ed textarea { width:100%; border:0; padding:16px; resize:vertical; line-height:1.8; font-size:14px; min-height:360px; }
+  .cover-prev { aspect-ratio:2/3; width:160px; }
+  .actions { display:flex; justify-content:flex-end; align-items:center; gap:12px; flex-wrap:wrap; margin:96px 0 0; padding:20px 0; border-top:1px solid var(--ink); }
+  footer { padding:60px 28px 32px; font-size:10px; text-transform:uppercase; letter-spacing:.04em; color:var(--sub); }
+  [hidden] { display:none !important; }
+</style>
+</head>
+<body>
+<header class="wsm-top">
+  <nav style="display:flex;gap:4px" aria-label="빠른 메뉴">
+    <a class="icon-btn" href="../admin/" aria-label="관리자 글 관리로"><svg aria-hidden="true" width="20" height="14" viewBox="0 0 20 14" fill="none" stroke="#111" stroke-width="1.3"><line x1="0" y1="1" x2="20" y2="1"/><line x1="0" y1="7" x2="20" y2="7"/><line x1="0" y1="13" x2="20" y2="13"/></svg></a>
+  </nav>
+  <div class="wsm-logo"><a class="logo" href="../">slow days</a><span class="dot" aria-hidden="true"></span><a href="../admin/" style="font-size:12px">관리자</a></div>
+</header>
+
+<p class="empty" id="wait">로그인 상태를 확인하는 중…</p>
+
+<form class="wrap" id="f" hidden>
+  <h1 class="wsm-title" id="ttl">Write a Story 새 글 쓰기</h1>
+  <div class="rows">
+    <div class="row2"><p class="lab">제목 Title</p><div class="fld">
+      <label for="titleEn" class="hint">영문 제목 (목록에서 대문자로 보여요)</label>
+      <input id="titleEn" class="line-in" style="font-size:20px;text-transform:uppercase" required>
+      <label for="titleKo" class="hint" style="margin-top:8px">한글 제목</label>
+      <input id="titleKo" class="line-in" style="font-size:20px" required>
+    </div></div>
+
+    <div class="row2"><p class="lab">분류 · 작성자 Category</p><div class="fld" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px">
+      <div style="display:flex;flex-direction:column;gap:6px"><label for="category" class="hint">분류</label>
+        <select id="category" class="box-in"><option value="essay">에세이 Essay</option><option value="daily">일상 Daily</option><option value="space">공간 Space</option><option value="books">책 Books</option></select></div>
+      <div style="display:flex;flex-direction:column;gap:6px"><label for="author" class="hint">작성자</label>
+        <input id="author" class="box-in" required></div>
+    </div></div>
+
+    <div class="row2"><p class="lab">대표 사진 Cover</p><div class="fld">
+      <label for="coverUrl" class="hint">사진 주소(URL)를 붙여 넣어 주세요. https:// 로 시작해야 해요. 세로 2:3 사진이 잘 어울려요.</label>
+      <input id="coverUrl" class="line-in" type="url" placeholder="https://">
+      <div class="cover-prev ph" id="coverPrev" style="--tone:#D9D4CC">[미리보기]</div>
+      <label for="coverCredit" class="hint" style="margin-top:8px">사진 출처 (사진 아래 작은 글씨로 보여요)</label>
+      <input id="coverCredit" class="line-in" placeholder="Photo by ">
+    </div></div>
+
+    <div class="row2"><p class="lab">도입 문단 Intro</p><div class="fld">
+      <label for="intro" class="hint">글 상세 맨 위에 세리프 글꼴로 크게 보여요 (3~4문장)</label>
+      <textarea id="intro" class="box-in" rows="4"></textarea>
+    </div></div>
+
+    <div class="row2"><p class="lab">본문 Story<span class="hint" style="display:block;font-weight:400;margin-top:8px;max-width:300px">버튼을 누르면 표시가 들어가요.<br>## 소제목 · **굵게** · > 인용구<br>![사진 설명](사진 주소) · [글자](링크 주소)<br>문단 사이는 한 줄을 비워 주세요.</span></p>
+      <div class="fld ed">
+        <div class="tb" role="toolbar" aria-label="본문 꾸미기">
+          <button type="button" data-ins="\n\n## 소제목\n\n">소제목</button>
+          <button type="button" data-wrap="**">굵게</button>
+          <button type="button" data-ins="\n\n![사진 설명](https://)\n\n">사진 넣기</button>
+          <button type="button" data-ins="\n\n![사진 1](https://) ![사진 2](https://)\n\n">사진 2장 펼침</button>
+          <button type="button" data-ins="\n\n> 인용할 문장\n\n">인용구</button>
+          <button type="button" data-ins="[링크 글자](https://)">링크</button>
+        </div>
+        <label for="body" class="sr">본문</label>
+        <textarea id="body" placeholder="이야기를 시작해 보세요."></textarea>
+      </div>
+    </div>
+
+    <div class="row2"><p class="lab">태그 Tags</p><div class="fld">
+      <label for="tags" class="hint">쉼표(,)로 구분해 입력하세요</label>
+      <input id="tags" class="line-in" placeholder="물건, 기록, 11월">
+    </div></div>
+
+    <div class="row2"><p class="lab">발행 설정 Publish</p><div class="fld" style="flex-direction:row;flex-wrap:wrap;gap:24px;align-items:flex-end">
+      <div style="display:flex;flex-direction:column;gap:6px"><label for="pubdate" class="hint">발행일 (비워 두면 지금 발행 · 미래 날짜면 예약 발행)</label>
+        <input id="pubdate" class="box-in" type="date"></div>
+    </div></div>
+  </div>
+
+  <div class="actions">
+    <p class="msg" id="msg" role="status" style="margin-right:auto"></p>
+    <button type="button" class="btn" id="draftBtn">임시 저장</button>
+    <button type="button" class="btn" id="prevBtn" hidden>미리보기</button>
+    <button type="submit" class="btn dark" id="pubBtn">발행하기</button>
+  </div>
+</form>
+<footer>© 2026 slow days · 관리자 전용 화면</footer>
+
+<script type="module">
+import { onUser, getPost, savePost, esc, safeUrl, fmtDate } from "../assets/fb.js";
+const $ = (id) => document.getElementById(id);
+let id = new URLSearchParams(location.search).get("id");
+const F = ["titleEn", "titleKo", "category", "author", "coverUrl", "coverCredit", "intro", "body"];
+
+onUser(async (user) => {
+  if (!user) { location.replace("../admin/"); return; }
+  if (id) {
+    const p = await getPost(id).catch(() => null);
+    if (p) {
+      F.forEach((k) => ($(k).value = p[k] || ""));
+      $("tags").value = (p.tags || []).join(", ");
+      if (p.publishedAt) $("pubdate").value = fmtDate(p.publishedAt).replaceAll(".", "-");
+      $("ttl").textContent = "Edit Story 글 수정";
+      $("prevBtn").hidden = false;
+      preview();
+    } else id = null;
+  }
+  $("wait").hidden = true; $("f").hidden = false;
+});
+
+function preview() {
+  const u = safeUrl($("coverUrl").value.trim());
+  $("coverPrev").innerHTML = u ? `<img src="${esc(u)}" alt="대표 사진 미리보기">` : "[미리보기]";
+}
+$("coverUrl").oninput = preview;
+
+document.querySelector(".tb").onclick = (e) => {
+  const b = e.target.closest("button"); if (!b) return;
+  const t = $("body"), s = t.selectionStart, en = t.selectionEnd, v = t.value;
+  const ins = b.dataset.wrap ? b.dataset.wrap + (v.slice(s, en) || "굵게 할 글자") + b.dataset.wrap : b.dataset.ins.replace(/\\n/g, "\n");
+  t.value = v.slice(0, s) + ins + v.slice(en); t.focus(); t.selectionStart = t.selectionEnd = s + ins.length;
+};
+
+async function save(status) {
+  if (!$("f").reportValidity()) return;
+  const data = Object.fromEntries(F.map((k) => [k, $(k).value.trim()]));
+  data.tags = $("tags").value.split(",").map((s) => s.trim()).filter(Boolean);
+  data.status = status;
+  if ($("pubdate").value) data.publishedAtStr = $("pubdate").value;
+  $("msg").className = "msg"; $("msg").textContent = "저장하는 중…";
+  ["draftBtn", "pubBtn"].forEach((k) => ($(k).disabled = true));
+  try {
+    id = await savePost(id, data);
+    if (status === "published") { location.href = `../post/?id=${encodeURIComponent(id)}`; return; }
+    $("msg").textContent = "임시 저장했어요."; $("prevBtn").hidden = false;
+    history.replaceState(null, "", `?id=${encodeURIComponent(id)}`);
+  } catch (e) { console.error(e); $("msg").className = "msg err"; $("msg").textContent = "저장하지 못했어요. 관리자 계정으로 로그인했는지 확인해 주세요."; }
+  ["draftBtn", "pubBtn"].forEach((k) => ($(k).disabled = false));
+}
+$("f").onsubmit = (e) => { e.preventDefault(); save("published"); };
+$("draftBtn").onclick = () => save("draft");
+$("prevBtn").onclick = () => window.open(`../post/?id=${encodeURIComponent(id)}`, "_blank");
+</script>
+</body>
+</html>
