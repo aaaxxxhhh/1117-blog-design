@@ -63,7 +63,7 @@
 
 <script type="module">
 import { getPublished, cardHTML, sideHTML, esc, fmtDate, CATS, CAT_EN } from "../assets/fb.js?v=4";
-import { pageView } from "../assets/ga.js?v=1";
+import { pageView, track } from "../assets/ga.js?v=2";
 pageView();
 const qs = new URLSearchParams(location.search);
 const cat = qs.get("cat") || "";
@@ -75,14 +75,16 @@ const fBtn = document.getElementById("fBtn");
 const syncF = () => (fBtn.textContent = "Filter " + (chips.classList.contains("open") ? "−" : "+"));
 fBtn.onclick = () => { chips.classList.toggle("open"); syncF(); }; syncF();
 const q = document.getElementById("q");
+if (qs.get("q")) q.value = qs.get("q");
 if (qs.get("search")) q.focus();
 
-let view = "grid", all = [];
+let view = "grid", all = [], lastCount = 0;
 try { all = await getPublished(); } catch (e) { console.error(e); }
 function draw() {
   const word = q.value.trim().toLowerCase();
   const list = all.filter((p) => (!cat || p.category === cat) &&
     (!word || [p.titleEn, p.titleKo, p.intro, (p.tags || []).join(" ")].join(" ").toLowerCase().includes(word)));
+  lastCount = list.length;
   const out = document.getElementById("out");
   if (!list.length) { out.innerHTML = `<p class="empty">${all.length ? "조건에 맞는 글이 없어요." : "아직 발행된 글이 없어요."}</p>`; return; }
   out.innerHTML = view === "grid"
@@ -93,7 +95,20 @@ function draw() {
 const vGrid = document.getElementById("vGrid"), vIdx = document.getElementById("vIdx");
 vGrid.onclick = () => { view = "grid"; vGrid.classList.add("on"); vIdx.classList.remove("on"); draw(); };
 vIdx.onclick = () => { view = "index"; vIdx.classList.add("on"); vGrid.classList.remove("on"); draw(); };
-q.oninput = draw;
+// 검색: 검색어를 주소(?q=)에 남기고, 입력이 멈추면 search 이벤트 1회 전송
+let timer = 0, sent = qs.get("q") || "";
+q.oninput = () => {
+  draw();
+  clearTimeout(timer);
+  timer = setTimeout(() => {
+    const word = q.value.trim();
+    const u = new URL(location.href);
+    u.searchParams.delete("search");
+    if (word) u.searchParams.set("q", word); else u.searchParams.delete("q");
+    history.replaceState(null, "", u.pathname + u.search + u.hash);
+    if (word && word !== sent) { sent = word; track("search", { search_term: word, results_count: lastCount }); }
+  }, 800);
+};
 draw();
 </script>
 </body>
