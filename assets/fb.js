@@ -1,0 +1,113 @@
+// slow days — Firebase 연결 + 공통 함수
+import { initializeApp } from "https://www.gstatic.com/firebasejs/13.4.0/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail, setPersistence, browserLocalPersistence, browserSessionPersistence } from "https://www.gstatic.com/firebasejs/13.4.0/firebase-auth.js";
+import { getFirestore, collection, query, where, getDocs, getDoc, doc, addDoc, updateDoc, deleteDoc, serverTimestamp, Timestamp } from "https://www.gstatic.com/firebasejs/13.4.0/firebase-firestore.js";
+
+// Firebase 웹 앱 설정값 (공개되어도 되는 값입니다. 데이터 보호는 Firestore 보안 규칙이 담당합니다.)
+const firebaseConfig = {
+  apiKey: "AIzaSyBQIgZUvgVvr-aDZ_lo9RqoKpFyBlvGg8k",
+  authDomain: "slow-days-blog.firebaseapp.com",
+  projectId: "slow-days-blog",
+  storageBucket: "slow-days-blog.firebasestorage.app",
+  messagingSenderId: "462875351193",
+  appId: "1:462875351193:web:6fe9c2915d334923fb8008"
+};
+
+const app = initializeApp(firebaseConfig);
+export const auth = getAuth(app);
+export const db = getFirestore(app);
+const posts = collection(db, "posts");
+
+export const CATS = { essay: "Essay 에세이", daily: "Daily 일상", space: "Space 공간", books: "Books 책" };
+export const CAT_EN = { essay: "Essay", daily: "Daily", space: "Space", books: "Books" };
+const TONES = ["#E4DED3", "#C9CFC8", "#BFC3C7", "#D9D4CC", "#E2CFCB", "#CCD2CB", "#D6CEC4"];
+const SHAPES = [["100%", "64%"], ["72%", "100%"], ["100%", "78%"], ["76%", "100%"]];
+
+// ---------- 데이터 ----------
+const toMs = (t) => (t && t.toMillis ? t.toMillis() : 0);
+export const byNewest = (a, b) => toMs(b.publishedAt || b.createdAt) - toMs(a.publishedAt || a.createdAt);
+
+export async function getPublished() {
+  const snap = await getDocs(query(posts, where("status", "==", "published")));
+  const now = Date.now();
+  return snap.docs.map((d) => ({ id: d.id, ...d.data() }))
+    .filter((p) => !p.publishedAt || toMs(p.publishedAt) <= now)
+    .sort(byNewest);
+}
+export async function getAllPosts() {
+  const snap = await getDocs(posts);
+  return snap.docs.map((d) => ({ id: d.id, ...d.data() })).sort(byNewest);
+}
+export async function getPost(id) {
+  const s = await getDoc(doc(db, "posts", id));
+  return s.exists() ? { id: s.id, ...s.data() } : null;
+}
+export async function savePost(id, data) {
+  const body = { ...data, updatedAt: serverTimestamp() };
+  if (data.publishedAtStr) body.publishedAt = Timestamp.fromDate(new Date(data.publishedAtStr + "T09:00:00"));
+  else if (data.status === "published") body.publishedAt = Timestamp.now();
+  delete body.publishedAtStr;
+  if (id) { await updateDoc(doc(db, "posts", id), body); return id; }
+  body.createdAt = serverTimestamp();
+  const ref = await addDoc(posts, body);
+  return ref.id;
+}
+export const removePost = (id) => deleteDoc(doc(db, "posts", id));
+
+// ---------- 로그인 ----------
+export async function login(email, pw, keep) {
+  await setPersistence(auth, keep ? browserLocalPersistence : browserSessionPersistence);
+  return signInWithEmailAndPassword(auth, email, pw);
+}
+export const logout = () => signOut(auth);
+export const resetPw = (email) => sendPasswordResetEmail(auth, email);
+export const onUser = (cb) => onAuthStateChanged(auth, cb);
+
+// ---------- 화면 도우미 ----------
+export const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+export const safeUrl = (u) => (/^https?:\/\//i.test(u || "") ? u : "");
+export function fmtDate(t) {
+  if (!t || !t.toDate) return "";
+  const d = t.toDate();
+  return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, "0")}.${String(d.getDate()).padStart(2, "0")}`;
+}
+export function photo(p, i, label = "[사진]") {
+  const tone = TONES[i % TONES.length];
+  const url = safeUrl(p && p.coverUrl);
+  return `<div class="ph" style="--tone:${tone}">${url ? `<img src="${esc(url)}" alt="${esc(p.titleKo || p.titleEn || "")}" loading="lazy">` : label}</div>`;
+}
+export function shapeVars(i) { const s = SHAPES[i % SHAPES.length]; return `--w:${s[0]};--h:${s[1]}`; }
+export function cardHTML(p, i, base, tag = "h2") {
+  return `<a class="card" href="${base}post/?id=${encodeURIComponent(p.id)}">
+    <div class="frame" style="${shapeVars(i)}">${photo(p, i)}</div>
+    <${tag}>${esc(p.titleEn)}${p.titleKo ? "<br>" + esc(p.titleKo) : ""}</${tag}>
+    <p>${esc(CAT_EN[p.category] || "")} by ${esc(p.author || "")}<br>${fmtDate(p.publishedAt)}</p></a>`;
+}
+export function sideHTML(base, active) {
+  const items = [["", "All 전체 글"], ...Object.entries(CATS)];
+  return `<aside class="side"><nav aria-label="카테고리">${items.map(([k, v]) =>
+    `<a href="${base}list/${k ? "?cat=" + k : ""}" class="${active === k ? "on" : ""}">${v}</a>`).join("")}
+    <a href="${base}list/?search=1" style="margin-top:12px">Search 검색</a></nav>
+    <a class="brand" href="${base}"><strong>slow days</strong><span><br>느리게 보는 생활 기록</span></a></aside>`;
+}
+
+// 본문 표기법 → 화면 (## 소제목 / > 인용 / ![설명](주소) 사진 / **굵게** / [글자](주소) 링크)
+function inline(s) {
+  return esc(s)
+    .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+    .replace(/\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g, '<a href="$2" target="_blank" rel="noopener" style="text-decoration:underline">$1</a>');
+}
+export function renderBody(text) {
+  const blocks = String(text || "").replace(/\r/g, "").split(/\n{2,}/).map((b) => b.trim()).filter(Boolean);
+  let n = 0;
+  return blocks.map((b) => {
+    const imgs = [...b.matchAll(/!\[([^\]]*)\]\((https?:\/\/[^)\s]+)\)/g)];
+    if (imgs.length && b.replace(/!\[[^\]]*\]\([^)]*\)/g, "").trim() === "") {
+      const figs = imgs.map((m) => `<div class="ph" style="aspect-ratio:4/3"><img src="${esc(m[2])}" alt="${esc(m[1])}" loading="lazy"></div>`).join("");
+      return `<figure class="${imgs.length > 1 ? "spread" : "one"}"><div>${figs}</div>${imgs[0][1] ? `<figcaption>${esc(imgs.map((m) => m[1]).join(" · "))}</figcaption>` : ""}</figure>`;
+    }
+    if (b.startsWith("## ")) { n++; return `<h3 class="sub"><span>${String(n).padStart(2, "0")}</span>${inline(b.slice(3))}</h3>`; }
+    if (b.startsWith("> ")) return `<blockquote>“${inline(b.replace(/^> ?/gm, ""))}”</blockquote>`;
+    return `<p>${inline(b).replace(/\n/g, "<br>")}</p>`;
+  }).join("");
+}
