@@ -7,40 +7,36 @@
 <title>글쓰기 — slow days</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/style.css?v=4">
 <style>
-  form.wrap { padding:40px 28px 0; max-width:1360px; }
-  .rows { display:flex; flex-direction:column; gap:56px; }
-  .tb { display:flex; flex-wrap:wrap; border-bottom:1px solid var(--ink); font-size:11px; text-transform:uppercase; letter-spacing:.04em; }
-  .tb button { min-height:44px; padding:0 14px; border:0; border-right:1px solid #E0DEDA; background:#fff; cursor:pointer; }
-  .ed { border:1px solid var(--ink); }
-  .ed textarea { width:100%; border:0; padding:16px; resize:vertical; line-height:1.8; font-size:14px; min-height:360px; }
-  .cover-prev { aspect-ratio:2/3; width:160px; }
-  .drop { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; min-height:200px; border:1px dashed #8A8A8A; background:#F7F6F4; cursor:pointer; text-align:center; padding:20px; }
+  .tb { display:flex; flex-wrap:wrap; border-bottom:1px solid var(--ink); text-transform:uppercase; }
+  .tb button { height:36px; padding:0 12px; border:0; border-right:1px solid #E0DEDA; background:#fff; cursor:pointer; font-size:calc(var(--wsm-fs) - 2px); }
+  .ed { border:1px solid var(--ink); gap:0 !important; }
+  .ed textarea { width:100%; border:0; padding:12px; resize:vertical; line-height:1.7; font-size:var(--wsm-fs); min-height:340px; }
+  .cover-prev { aspect-ratio:2/3; width:140px; }
+  .drop { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; min-height:180px; border:1px dashed #8A8A8A; background:#F7F6F4; cursor:pointer; text-align:center; padding:20px; }
   .drop.over { border-color:var(--ink); background:#EFEDE9; }
-  .actions { display:flex; justify-content:flex-end; align-items:center; gap:12px; flex-wrap:wrap; margin:96px 0 0; padding:20px 0; border-top:1px solid var(--ink); }
-  footer { padding:60px 28px 32px; font-size:10px; text-transform:uppercase; letter-spacing:.04em; color:var(--sub); }
-  [hidden] { display:none !important; }
+  .actions { display:flex; justify-content:flex-end; align-items:center; gap:10px; flex-wrap:wrap; margin-top:40px; padding:16px 0; border-top:1px solid var(--ink); }
 </style>
 </head>
 <body>
 <header class="wsm-top">
-  <nav style="display:flex;gap:4px" aria-label="빠른 메뉴">
-    <a class="icon-btn" href="../admin/" aria-label="관리자 글 관리로"><svg aria-hidden="true" width="20" height="14" viewBox="0 0 20 14" fill="none" stroke="#111" stroke-width="1.3"><line x1="0" y1="1" x2="20" y2="1"/><line x1="0" y1="7" x2="20" y2="7"/><line x1="0" y1="13" x2="20" y2="13"/></svg></a>
+  <nav class="icons" aria-label="빠른 메뉴">
+    <a class="icon" href="../admin/" aria-label="관리자 글 관리로"><svg aria-hidden="true" viewBox="0 0 20 20" fill="none" stroke="#111" stroke-width="1.3"><line x1="1" y1="5" x2="19" y2="5"/><line x1="1" y1="10" x2="19" y2="10"/><line x1="1" y1="15" x2="19" y2="15"/></svg></a>
   </nav>
-  <div class="wsm-logo"><a class="logo" href="../">slow days</a><span class="dot" aria-hidden="true"></span><a href="../admin/" style="font-size:12px">관리자</a></div>
+  <div class="right"><a class="logo-s" href="../">slow days</a><span class="dot" aria-hidden="true"></span><a href="../admin/">관리자</a></div>
 </header>
 
 <p class="empty" id="wait">로그인 상태를 확인하는 중…</p>
 
-<form class="wrap" id="f" hidden>
+<form class="wsm-page" id="f" hidden>
   <h1 class="wsm-title" id="ttl">Write a Story 새 글 쓰기</h1>
-  <div class="rows">
+  <div>
     <div class="row2"><p class="lab">제목 Title</p><div class="fld">
       <label for="titleEn" class="hint">영문 제목 (목록에서 대문자로 보여요)</label>
-      <input id="titleEn" class="line-in" style="font-size:20px;text-transform:uppercase" required>
+      <input id="titleEn" class="line-in" style="text-transform:uppercase" required>
       <label for="titleKo" class="hint" style="margin-top:8px">한글 제목</label>
-      <input id="titleKo" class="line-in" style="font-size:20px" required>
+      <input id="titleKo" class="line-in" required>
     </div></div>
 
     <div class="row2"><p class="lab">분류 · 작성자 Category</p><div class="fld" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px">
@@ -58,7 +54,7 @@
       <input id="coverFile" type="file" accept="image/jpeg,image/png,image/webp" class="sr">
       <div style="display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap">
         <div class="cover-prev ph" id="coverPrev" style="--tone:#D9D4CC">[미리보기]</div>
-        <button type="button" class="btn" id="coverDel" hidden style="min-height:44px">사진 빼기</button>
+        <button type="button" class="btn" id="coverDel" hidden>사진 빼기</button>
       </div>
       <label for="coverCredit" class="hint" style="margin-top:8px">사진 출처 (사진 아래 작은 글씨로 보여요)</label>
       <input id="coverCredit" class="line-in" placeholder="Photo by ">
@@ -69,7 +65,7 @@
       <textarea id="intro" class="box-in" rows="4"></textarea>
     </div></div>
 
-    <div class="row2"><p class="lab">본문 Story<span class="hint" style="display:block;font-weight:400;margin-top:8px;max-width:300px">버튼을 누르면 표시가 들어가요.<br>## 소제목 · **굵게** · > 인용구<br>"사진 넣기"를 누르면 사진 파일을 골라 올려요<br>[글자](링크 주소)<br>문단 사이는 한 줄을 비워 주세요.</span></p>
+    <div class="row2"><p class="lab">본문 Story<span class="hint" style="display:block;font-weight:400;margin-top:6px;max-width:300px">버튼을 누르면 표시가 들어가요.<br>## 소제목 · **굵게** · > 인용구<br>"사진 넣기"를 누르면 사진 파일을 골라 올려요<br>[글자](링크 주소)<br>문단 사이는 한 줄을 비워 주세요.</span></p>
       <div class="fld ed">
         <div class="tb" role="toolbar" aria-label="본문 꾸미기">
           <button type="button" data-ins="\n\n## 소제목\n\n">소제목</button>
@@ -103,10 +99,10 @@
     <button type="submit" class="btn dark" id="pubBtn">발행하기</button>
   </div>
 </form>
-<footer>© 2026 slow days · 관리자 전용 화면</footer>
+<footer class="wsm-foot">© 2026 slow days · 관리자 전용 화면</footer>
 
 <script type="module">
-import { onUser, getPost, savePost, uploadImage, fileToDataURL, getImage, esc, safeSrc, fmtDate } from "../assets/fb.js";
+import { onUser, getPost, savePost, uploadImage, fileToDataURL, getImage, esc, safeSrc, fmtDate } from "../assets/fb.js?v=4";
 const $ = (id) => document.getElementById(id);
 let id = new URLSearchParams(location.search).get("id");
 const F = ["titleEn", "titleKo", "category", "author", "coverCredit", "intro", "body"];
