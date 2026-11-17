@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>글 목록 — slow days</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="../assets/style.css">
+<style>
+  .bar { position:sticky; top:0; z-index:4; background:#fff; display:flex; gap:20px; align-items:flex-start; flex-wrap:wrap; padding:0 20px 8px 0; }
+  .bar input { flex:1 1 360px; min-height:44px; border:0; background:var(--soft); padding:0 12px; font-size:12px; text-transform:uppercase; letter-spacing:.04em; }
+  .bar .ctrl { flex:0 0 240px; display:flex; flex-direction:column; gap:4px; font-size:11px; text-transform:uppercase; letter-spacing:.04em; }
+  .bar .ctrl > div { display:flex; background:var(--soft); }
+  .bar button { min-height:44px; border:0; background:var(--soft); padding:0 12px; cursor:pointer; flex:1; text-align:left; color:var(--accent); }
+  .bar button.on { color:var(--ink); }
+  .bar button + button { text-align:right; }
+  .chips { display:none; gap:8px; flex-wrap:wrap; justify-content:flex-end; padding:8px 20px 0 0; font-size:11px; text-transform:uppercase; letter-spacing:.04em; }
+  .chips.open { display:flex; }
+  .chips a { min-height:44px; padding:0 16px; border:1px solid var(--ink); display:flex; align-items:center; }
+  .chips a.on { background:var(--ink); color:#fff; }
+  #out { padding:110px 20px 0 0; }
+  .idx { overflow-x:auto; }
+  .idx .r { display:grid; grid-template-columns:2fr 1fr 1fr 1fr; gap:12px; min-height:48px; align-items:center; border-bottom:1px solid var(--line); font-size:13px; min-width:640px; }
+  .idx .h { min-height:0; padding-bottom:10px; border-bottom:1px solid var(--ink); font-size:10px; text-transform:uppercase; letter-spacing:.04em; color:var(--sub); }
+  .top { display:flex; justify-content:center; padding:120px 0 40px; font-size:10px; text-transform:uppercase; letter-spacing:.04em; }
+</style>
+</head>
+<body>
+<div id="side"></div>
+<main class="with-side">
+  <div class="bar">
+    <label for="q" class="sr">글 검색</label>
+    <input id="q" type="search" placeholder="Search 검색어를 입력하세요">
+    <div class="ctrl">
+      <div><button type="button" id="vGrid" class="on">Grid 그리드</button><button type="button" id="vIdx">Index 목록</button></div>
+      <button type="button" id="fBtn" style="text-align:left;color:var(--ink)">Filter 필터 +</button>
+    </div>
+  </div>
+  <div class="chips" id="chips"></div>
+  <div id="out"><p class="empty">글을 불러오는 중…</p></div>
+  <div class="top"><a href="#" style="min-height:44px;display:flex;align-items:center">Back to top 맨 위로 ↑</a></div>
+</main>
+
+<script type="module">
+import { getPublished, cardHTML, sideHTML, esc, fmtDate, CATS, CAT_EN } from "../assets/fb.js";
+const qs = new URLSearchParams(location.search);
+const cat = qs.get("cat") || "";
+document.getElementById("side").outerHTML = sideHTML("../", cat);
+const chips = document.getElementById("chips");
+chips.innerHTML = [["", "전체"], ...Object.entries(CATS)].map(([k, v]) => `<a href="./${k ? "?cat=" + k : ""}" class="${k === cat ? "on" : ""}">${v}</a>`).join("");
+if (cat) chips.classList.add("open");
+const fBtn = document.getElementById("fBtn");
+fBtn.onclick = () => { chips.classList.toggle("open"); fBtn.textContent = "Filter 필터 " + (chips.classList.contains("open") ? "−" : "+"); };
+const q = document.getElementById("q");
+if (qs.get("search")) q.focus();
+
+let view = "grid", all = [];
+try { all = await getPublished(); } catch (e) { console.error(e); }
+function draw() {
+  const word = q.value.trim().toLowerCase();
+  const list = all.filter((p) => (!cat || p.category === cat) &&
+    (!word || [p.titleEn, p.titleKo, p.intro, (p.tags || []).join(" ")].join(" ").toLowerCase().includes(word)));
+  const out = document.getElementById("out");
+  if (!list.length) { out.innerHTML = `<p class="empty">${all.length ? "조건에 맞는 글이 없어요." : "아직 발행된 글이 없어요."}</p>`; return; }
+  out.innerHTML = view === "grid"
+    ? `<div class="grid4">${list.map((p, i) => cardHTML(p, i, "../")).join("")}</div>`
+    : `<div class="idx"><div class="r h"><span>제목 Title</span><span>분류 Type</span><span>작성자 Author</span><span>발행일 Date</span></div>${list.map((p) =>
+        `<a class="r" href="../post/?id=${encodeURIComponent(p.id)}"><span class="upper">${esc(p.titleEn)} · ${esc(p.titleKo)}</span><span>${esc(CAT_EN[p.category] || "")}</span><span>${esc(p.author)}</span><span>${fmtDate(p.publishedAt)}</span></a>`).join("")}</div>`;
+}
+const vGrid = document.getElementById("vGrid"), vIdx = document.getElementById("vIdx");
+vGrid.onclick = () => { view = "grid"; vGrid.classList.add("on"); vIdx.classList.remove("on"); draw(); };
+vIdx.onclick = () => { view = "index"; vIdx.classList.add("on"); vGrid.classList.remove("on"); draw(); };
+q.oninput = draw;
+draw();
+</script>
+</body>
+</html>
