@@ -5,50 +5,68 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>글 — slow days</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@400;500&family=IBM+Plex+Mono&display=swap">
-<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600&family=Noto+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@400&family=IBM+Plex+Mono&display=swap">
+<link rel="stylesheet" href="../assets/style.css?v=4">
 <style>
-  .top-logo { display:flex; justify-content:center; padding-top:18px; }
-  .top-logo a { font-size:16px; font-weight:600; letter-spacing:-.04em; }
+  /* PW 글 상세와 같은 크기·위치 (1440px: 제목 27.424px · 대표 사진 36.2vw · 도입 17.6px 세리프 · 본문 14.4px 28.6vw) */
+  .top-logo { position:fixed; left:0; right:0; top:16px; height:24px; display:flex; justify-content:center; z-index:6; pointer-events:none; }
+  .top-logo a { pointer-events:auto; font-size:16px; font-weight:600; letter-spacing:-.04em; }
   article { padding:0 24px; }
-  .head { text-align:center; padding-top:60px; }
-  .head h1, .head .ko { margin:0; font-size:34px; line-height:1.1; font-weight:400; text-transform:uppercase; }
-  .head .by { margin:28px 0 0; font-size:12px; line-height:1.5; }
-  .col { margin:0 auto; width:min(100%,480px); }
-  .cover { margin:140px auto 0; width:min(100%,480px); }
+  .head { text-align:center; padding-top:80px; }
+  .head h1, .head .ko { margin:0; font-size:var(--pw-title); line-height:1; font-weight:400; text-transform:uppercase; }
+  .head .by { margin:25px 0 0; font-size:var(--pw-meta); line-height:1.4; }
+  .col { margin:0 auto; width:36.2vw; }
+  .cover { margin:120px auto 0; width:36.2vw; }
   .cover .ph { aspect-ratio:2/3; }
-  .mono, figcaption { font-family:'IBM Plex Mono',monospace; font-size:10px; text-transform:uppercase; margin-top:6px; }
-  .intro { margin-top:64px; font-family:'Noto Serif KR',serif; font-size:17px; line-height:1.75; }
+  figcaption { font-family:var(--mono); font-size:var(--pw-side); line-height:1.4; text-transform:uppercase; margin-top:4px; }
+  .intro { margin-top:64px; font-family:var(--serif); font-size:17.6px; line-height:1.5; }
   .intro p { margin:0 0 22px; }
-  .body { margin-top:48px; font-size:14px; line-height:1.8; }
-  .body p { margin:0 0 24px; }
-  .body h3.sub { margin:48px 0 16px; font-size:10px; font-weight:500; text-transform:uppercase; letter-spacing:.04em; color:var(--sub); display:flex; gap:12px; }
-  .body blockquote { margin:96px -170px; text-align:center; font-family:'Noto Serif KR',serif; font-size:28px; line-height:1.45; }
+  .body { margin:48px auto 0; width:36.2vw; padding-left:7.6vw; font-size:14.4px; line-height:1.45; }
+  .body p { margin:0 0 20px; }
+  .body h3.sub { margin:48px 0 14px; font-size:var(--pw-side); font-weight:500; text-transform:uppercase; color:var(--sub); display:flex; gap:12px; }
+  .body blockquote { margin:96px 0 96px calc(123px - 39.5vw); width:calc(100vw - 147px); text-align:center; font-family:var(--serif); font-size:var(--pw-title); line-height:1.1; }
   .body figure { margin:72px 0; }
-  .body figure.spread { margin-left:calc(50% - min(48vw,600px)); margin-right:calc(50% - min(48vw,600px)); }
+  .body figure.spread { margin-left:calc(123px - 39.5vw); width:calc(100vw - 147px); }
   .body figure.spread > div { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:24px; }
-  .tags { font-size:11px; color:var(--sub); }
-  .share { display:flex; justify-content:space-between; flex-wrap:wrap; gap:12px; margin-top:64px; padding-top:16px; border-top:1px solid var(--ink); font-size:11px; text-transform:uppercase; letter-spacing:.04em; }
-  .share a, .share button { min-height:44px; display:flex; align-items:center; border:0; background:none; padding:0; cursor:pointer; text-transform:inherit; letter-spacing:inherit; font-size:inherit; }
-  .more { margin-top:200px; padding:0 24px; }
-  .more h2.t { margin:0 0 56px; text-align:center; font-size:11px; font-weight:500; text-transform:uppercase; letter-spacing:.06em; }
-  .more .grid3 { max-width:1200px; margin:0 auto; }
-  .more .card h3 { font-size:22px; }
-  .foot { position:sticky; bottom:0; margin-top:160px; display:flex; justify-content:space-between; gap:16px; padding:10px 20px; background:rgba(255,255,255,.95); font-family:'IBM Plex Mono',monospace; font-size:10px; text-transform:uppercase; flex-wrap:wrap; }
-  @media (max-width:900px) { .body blockquote { margin:64px 0; font-size:22px; } }
+  .tags { font-size:var(--pw-meta); color:var(--sub); }
+  .share { display:flex; justify-content:space-between; flex-wrap:wrap; gap:12px; margin-top:56px; padding-top:12px; border-top:1px solid var(--ink); font-size:var(--pw-meta); text-transform:uppercase; }
+  .share a, .share button { display:flex; align-items:center; min-height:32px; border:0; background:none; padding:0; cursor:pointer; text-transform:inherit; font-size:inherit; }
+  .more { margin-top:200px; }
+  .more h2.t { margin:0 0 56px; text-align:center; font-size:var(--pw-meta); font-weight:400; text-transform:uppercase; }
+  .side .brand { bottom:44px; }
+  .foot { position:sticky; bottom:0; margin-top:160px; display:flex; justify-content:space-between; gap:16px; padding:10px 24px; background:rgba(255,255,255,.96); font-family:var(--mono); font-size:var(--pw-side); text-transform:uppercase; flex-wrap:wrap; }
+  @media (max-width:1023px) {
+    .top-logo { display:none; }
+    article { padding:0 var(--pw-pad); }
+    .head { padding-top:44px; }
+    .cover { margin:44px 0 0 26.3vw; width:39.3vw; }
+    .col { margin-left:26.3vw; margin-right:0; width:47.5vw; }
+    .intro { font-size:17px; }
+    .body { margin:48px 0 0 26.3vw; width:47.5vw; padding-left:0; font-size:15.3px; }
+    .body blockquote { margin:72px 0 72px -26.3vw; width:calc(100vw - 26px); }
+    .body figure.spread { margin-left:-26.3vw; width:calc(100vw - 26px); }
+    .foot { padding:10px var(--pw-pad); }
+  }
+  @media (max-width:640px) {
+    .head { padding-top:30px; }
+    .head h1, .head .ko { font-size:29.138px; }
+    .cover, .col, .body { margin-left:0; width:100%; }
+    .cover { margin-top:44px; }
+    .body figure.spread, .body blockquote { margin-left:0; width:100%; }
+    .body figure.spread > div { grid-template-columns:1fr; }
+    .body blockquote { font-size:23.8px; }
+  }
 </style>
 </head>
 <body>
 <div class="top-logo"><a href="../">slow days</a></div>
 <div id="side"></div>
-<div class="with-side">
-  <article id="art"><p class="empty">글을 불러오는 중…</p></article>
-  <section class="more" aria-label="다음에 읽을 글"><h2 class="t">More Stories 다음에 읽을 글</h2><div class="grid3" id="more"></div></section>
-  <div class="foot" id="foot"></div>
-</div>
+<article id="art"><p class="empty">글을 불러오는 중…</p></article>
+<section class="more with-side" aria-label="다음에 읽을 글"><h2 class="t">More Stories 다음에 읽을 글</h2><div class="grid3" id="more"></div></section>
+<div class="foot" id="foot"></div>
 
 <script type="module">
-import { getPost, getPublished, sideHTML, esc, fmtDate, renderBody, cardHTML, photo, hydrateImages, CAT_EN } from "../assets/fb.js";
+import { getPost, getPublished, sideHTML, esc, fmtDate, renderBody, cardHTML, photo, hydrateImages, CAT_EN } from "../assets/fb.js?v=4";
 const id = new URLSearchParams(location.search).get("id");
 let p = null;
 try { p = id ? await getPost(id) : null; } catch (e) { console.error(e); }
@@ -64,8 +82,8 @@ if (!p) {
       <p class="by">${esc(CAT_EN[p.category] || "")} by ${esc(p.author)}<br>${fmtDate(p.publishedAt)}</p></header>
     <figure class="cover">${photo(p, 3, "[대표 사진]")}${p.coverCredit ? `<figcaption>${esc(p.coverCredit)}</figcaption>` : ""}</figure>
     <div class="col intro">${intro}</div>
-    <div class="col body">${renderBody(p.body)}</div>
-    <div class="col">${(p.tags || []).length ? `<p class="tags">${p.tags.map((t) => "#" + esc(t)).join(" ")}</p>` : ""}
+    <div class="body">${renderBody(p.body)}
+      ${(p.tags || []).length ? `<p class="tags">${p.tags.map((t) => "#" + esc(t)).join(" ")}</p>` : ""}
       <div class="share"><a href="../list/">← 목록으로</a><button type="button" id="copy">링크 복사</button></div></div>`;
   if (p.coverId) art.querySelector(".cover .ph").innerHTML = `<img data-img="${esc(p.coverId)}" alt="${esc(p.titleKo || p.titleEn)}">`;
   hydrateImages(art);
