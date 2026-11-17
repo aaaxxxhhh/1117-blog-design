@@ -40,8 +40,8 @@
   .quote figcaption { margin-top:18px; font-size:var(--pw-side); line-height:1.4; text-transform:uppercase; }
   .single { padding-top:140px; display:flex; justify-content:center; }
   .single .card { width:calc((100% - 48px) / 3); }
-  .about { padding-top:120px; }
-  .about p { margin:0; font-size:var(--pw-title); line-height:1.1; }
+  .about { padding-top:120px; padding-inline:calc(123px * 2); } /* 좌우 여백 = 왼쪽 사이드 메뉴 폭(123px)의 2배 */
+  .about p { margin:0; font-size:var(--pw-title); line-height:1.1; word-break:keep-all; }
   .about a { display:inline-flex; margin-top:24px; font-size:var(--pw-meta); text-transform:uppercase; border-bottom:1px solid #111; }
   footer.home { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:24px; padding:160px 0 24px; font-size:var(--pw-side); line-height:1.4; text-transform:uppercase; }
   footer.home nav { display:flex; flex-direction:column; }
@@ -51,6 +51,7 @@
     .strip a.p { width:51.6vw; } .strip a.p .ph { height:calc(51.6vw * 1.25); }
     .strip a.l { width:96.6vw; margin-top:49.6vw; } .strip a.l .ph { height:calc(96.6vw * .694); }
     .lower { display:block; }
+    .about { padding-inline:0; } /* 1024px 미만: 사이드 메뉴가 위쪽 줄로 바뀌어 폭이 없음 */
     main.home { padding:64px var(--pw-pad) 0; }
     .single .card { width:calc((100% - 26px) / 3); }
     footer.home { font-size:var(--pw-meta); }
