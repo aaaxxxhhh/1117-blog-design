@@ -3,11 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
 <title>글 — slow days</title>
 <meta name="description" content="slow days — 느리게 보는 생활 기록">
+<meta name="robots" content="noindex, follow">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600&family=Noto+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@400&family=IBM+Plex+Mono&display=swap">
-<link rel="stylesheet" href="../assets/style.css?v=5">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600&family=Noto+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@400&family=IBM+Plex+Mono&display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600&family=Noto+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@400&family=IBM+Plex+Mono&display=swap"></noscript>
+<link rel="stylesheet" href="../assets/style.css?v=6">
 <style>
   /* PW 글 상세와 같은 크기·위치 (1440px: 제목 27.424px · 대표 사진 36.2vw · 도입 17.6px 세리프 · 본문 14.4px 28.6vw) */
   /* 상단 로고: 영문+한글 제목 두 줄과 같은 높이(제목 크기 × 2) · 모든 글 상세에서 같은 위치에 고정 */
@@ -71,7 +74,7 @@
 
 <script type="module">
 import { pageView, track, watchReading, shareUrl } from "../assets/ga.js?v=3";
-import { getPost, getPublished, sideHTML, esc, fmtDate, renderBody, cardHTML, photo, hydrateImages, CAT_EN } from "../assets/fb.js?v=4";
+import { getPost, getPublished, sideHTML, esc, fmtDate, renderBody, cardHTML, photo, hydrateImages, CAT_EN } from "../assets/fb.js?v=5";
 const qs = new URLSearchParams(location.search);
 const staticId = document.documentElement.dataset.postId || "";
 const id = staticId || qs.get("id");
@@ -87,6 +90,7 @@ let p = null;
 try { p = id ? await getPost(id) : null; } catch (e) { console.error(e); }
 document.getElementById("side").outerHTML = sideHTML("../", p ? p.category : "");
 const art = document.getElementById("art");
+const prebuilt = art.dataset.static === "1"; // 자동 생성 페이지: 본문이 이미 HTML에 들어 있음
 if (!p) {
   pageView({ post_id: id || "", not_found: true });
   art.innerHTML = `<p class="empty">글을 찾을 수 없어요. <a href="../list/" style="text-decoration:underline">글 목록으로 가기</a></p>`;
@@ -94,7 +98,7 @@ if (!p) {
   document.title = `${p.titleKo || p.titleEn} — slow days`;
   const md = document.querySelector('meta[name="description"]'); if (md && !staticId) md.content = String(p.intro || "").replace(/\s+/g, " ").slice(0, 120);
   const intro = String(p.intro || "").split(/\n{2,}/).filter(Boolean).map((t) => `<p>${esc(t)}</p>`).join("");
-  art.innerHTML = `
+  if (!prebuilt) art.innerHTML = `
     <header class="head"><h1>${esc(p.titleEn)}</h1><p class="ko">${esc(p.titleKo)}</p>
       <p class="by">${esc(CAT_EN[p.category] || "")} by ${esc(p.author)}<br>${fmtDate(p.publishedAt)}</p></header>
     <figure class="cover">${photo(p, 3, "[대표 사진]")}${p.coverCredit ? `<figcaption>${esc(p.coverCredit)}</figcaption>` : ""}</figure>
@@ -102,7 +106,7 @@ if (!p) {
     <div class="body">${renderBody(p.body)}
       ${(p.tags || []).length ? `<p class="tags">${p.tags.map((t) => "#" + esc(t)).join(" ")}</p>` : ""}
       <div class="share"><a href="../list/">← 목록으로</a><button type="button" id="copy">링크 복사</button></div></div>`;
-  if (p.coverId) art.querySelector(".cover .ph").innerHTML = `<img data-img="${esc(p.coverId)}" alt="${esc(p.titleKo || p.titleEn)}">`;
+  if (p.coverId && !prebuilt) art.querySelector(".cover .ph").innerHTML = `<img data-img="${esc(p.coverId)}" alt="${esc(p.titleKo || p.titleEn)}">`;
   hydrateImages(art);
   document.getElementById("copy").onclick = async (e) => {
     try {
