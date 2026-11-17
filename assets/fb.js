@@ -17,6 +17,7 @@ const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 const posts = collection(db, "posts");
+const images = collection(db, "images");
 
 export const CATS = { essay: "Essay 에세이", daily: "Daily 일상", space: "Space 공간", books: "Books 책" };
 export const CAT_EN = { essay: "Essay", daily: "Daily", space: "Space", books: "Books" };
@@ -54,6 +55,43 @@ export async function savePost(id, data) {
 }
 export const removePost = (id) => deleteDoc(doc(db, "posts", id));
 
+// ---------- 사진 (Firestore 'images'에 사진 1장 = 문서 1개로 저장) ----------
+// 무료 요금제(Spark)에서는 Cloud Storage를 쓸 수 없어서, 사진을 줄여 글자(data URL)로 바꿔 저장합니다.
+// 문서 1개는 최대 1MiB라서 약 900KB 이하가 되도록 크기·화질을 자동으로 낮춥니다.
+const LIMIT = 900 * 1024;
+function loadImg(file) {
+  return new Promise((ok, no) => { const u = URL.createObjectURL(file); const im = new Image();
+    im.onload = () => { URL.revokeObjectURL(u); ok(im); }; im.onerror = () => no(new Error("사진을 읽지 못했어요")); im.src = u; });
+}
+export async function fileToDataURL(file, maxW = 1600, q = 0.82) {
+  const im = await loadImg(file);
+  let w = Math.min(maxW, im.naturalWidth), out = "";
+  for (let i = 0; i < 8; i++) {
+    const h = Math.round(im.naturalHeight * (w / im.naturalWidth));
+    const cv = document.createElement("canvas"); cv.width = w; cv.height = h;
+    const cx = cv.getContext("2d"); cx.fillStyle = "#fff"; cx.fillRect(0, 0, w, h); cx.drawImage(im, 0, 0, w, h);
+    out = cv.toDataURL("image/jpeg", q);
+    if (out.length <= LIMIT) return out;
+    if (q > 0.55) q -= 0.1; else w = Math.round(w * 0.8);
+  }
+  return out;
+}
+export async function uploadImage(file) {
+  const data = await fileToDataURL(file);
+  const ref = await addDoc(images, { data, createdAt: serverTimestamp() });
+  return ref.id;
+}
+const imgCache = {};
+export async function getImage(id) {
+  if (!imgCache[id]) imgCache[id] = getDoc(doc(db, "images", id)).then((s) => (s.exists() ? s.data().data : ""));
+  return imgCache[id];
+}
+export async function hydrateImages(root) {
+  await Promise.all([...root.querySelectorAll("img[data-img]")].map(async (el) => {
+    try { const d = await getImage(el.dataset.img); if (d) el.src = d; } catch (e) { console.error(e); }
+  }));
+}
+
 // ---------- 로그인 ----------
 export async function login(email, pw, keep) {
   await setPersistence(auth, keep ? browserLocalPersistence : browserSessionPersistence);
@@ -66,6 +104,7 @@ export const onUser = (cb) => onAuthStateChanged(auth, cb);
 // ---------- 화면 도우미 ----------
 export const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 export const safeUrl = (u) => (/^https?:\/\//i.test(u || "") ? u : "");
+export const safeSrc = (u) => (/^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(u || "") ? u : safeUrl(u));
 export function fmtDate(t) {
   if (!t || !t.toDate) return "";
   const d = t.toDate();
@@ -73,8 +112,8 @@ export function fmtDate(t) {
 }
 export function photo(p, i, label = "[사진]") {
   const tone = TONES[i % TONES.length];
-  const url = safeUrl(p && p.coverUrl);
-  return `<div class="ph" style="--tone:${tone}">${url ? `<img src="${esc(url)}" alt="${esc(p.titleKo || p.titleEn || "")}" loading="lazy">` : label}</div>`;
+  const src = safeSrc(p && (p.coverThumb || p.coverUrl));
+  return `<div class="ph" style="--tone:${tone}">${src ? `<img src="${esc(src)}" alt="${esc(p.titleKo || p.titleEn || "")}" loading="lazy">` : label}</div>`;
 }
 export function shapeVars(i) { const s = SHAPES[i % SHAPES.length]; return `--w:${s[0]};--h:${s[1]}`; }
 export function cardHTML(p, i, base, tag = "h2") {
@@ -101,9 +140,9 @@ export function renderBody(text) {
   const blocks = String(text || "").replace(/\r/g, "").split(/\n{2,}/).map((b) => b.trim()).filter(Boolean);
   let n = 0;
   return blocks.map((b) => {
-    const imgs = [...b.matchAll(/!\[([^\]]*)\]\((https?:\/\/[^)\s]+)\)/g)];
+    const imgs = [...b.matchAll(/!\[([^\]]*)\]\((https?:\/\/[^)\s]+|img:[A-Za-z0-9]+)\)/g)];
     if (imgs.length && b.replace(/!\[[^\]]*\]\([^)]*\)/g, "").trim() === "") {
-      const figs = imgs.map((m) => `<div class="ph" style="aspect-ratio:4/3"><img src="${esc(m[2])}" alt="${esc(m[1])}" loading="lazy"></div>`).join("");
+      const figs = imgs.map((m) => `<div class="ph" style="aspect-ratio:4/3">${m[2].startsWith("img:") ? `<img data-img="${esc(m[2].slice(4))}" alt="${esc(m[1])}">` : `<img src="${esc(m[2])}" alt="${esc(m[1])}" loading="lazy">`}</div>`).join("");
       return `<figure class="${imgs.length > 1 ? "spread" : "one"}"><div>${figs}</div>${imgs[0][1] ? `<figcaption>${esc(imgs.map((m) => m[1]).join(" · "))}</figcaption>` : ""}</figure>`;
     }
     if (b.startsWith("## ")) { n++; return `<h3 class="sub"><span>${String(n).padStart(2, "0")}</span>${inline(b.slice(3))}</h3>`; }
