@@ -90,7 +90,7 @@
 </div>
 
 <script type="module">
-import { getPublished, cardHTML, sideHTML, esc, safeUrl } from "./assets/fb.js";
+import { getPublished, cardHTML, sideHTML, esc, safeSrc } from "./assets/fb.js";
 document.getElementById("side").outerHTML = sideHTML("", "");
 const T = ["#E2CFCB","#D9D4CC","#C9CFC8","#E4DED3","#BFC3C7","#D6CEC4","#CCD2CB"];
 const W = [330, 330, 690, 330, 330, 690, 330], H = [413, 427, 479, 413, 495, 479, 427], M = [154, 0, 121, 0, 113, 121, 0];
@@ -100,7 +100,7 @@ const strip = document.getElementById("strip");
 if (list.length) {
   strip.innerHTML = Array.from({ length: 7 }, (_, i) => {
     const p = list[i % list.length];
-    const url = safeUrl(p.coverUrl), cat = { essay: "에세이", daily: "일상", space: "공간", books: "책" }[p.category] || "";
+    const url = safeSrc(p.coverThumb || p.coverUrl), cat = { essay: "에세이", daily: "일상", space: "공간", books: "책" }[p.category] || "";
     return `<a href="post/?id=${encodeURIComponent(p.id)}" style="width:${W[i]}px;margin-top:${M[i]}px"><div class="ph" style="height:${H[i]}px;--tone:${T[i]}">${url ? `<img src="${esc(url)}" alt="${esc(p.titleKo || p.titleEn)}">` : "[사진]"}</div>${esc(p.titleKo || p.titleEn)} - ${cat}</a>`;
   }).join("");
   document.getElementById("row1").innerHTML = list.slice(0, 3).map((p, i) => cardHTML(p, i, "")).join("");
