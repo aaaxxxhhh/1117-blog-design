@@ -5,43 +5,50 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>slow days — 느리게 보는 생활 기록</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@400;500&display=swap">
-<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600&family=Noto+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@400&display=swap">
+<link rel="stylesheet" href="assets/style.css?v=4">
 <style>
-  /* ① 첫 화면 : WSM 스타일 */
-  .intro { position:relative; min-height:1040px; overflow:hidden; }
-  .logo-big { margin:0; padding:72px 0 0 300px; font-size:88px; line-height:.9; font-weight:600; letter-spacing:-.045em; }
-  .strip { position:absolute; left:-230px; top:340px; display:flex; gap:30px; align-items:flex-start; white-space:nowrap; }
-  .strip a { flex:0 0 auto; display:flex; flex-direction:column; align-items:center; gap:22px; font-size:12px; }
+  /* ① 첫 화면 : WSM 홈과 같은 크기·위치 (1440 / 768 / 390px에서 잰 값) */
+  .intro { position:relative; overflow:hidden; font-size:var(--wsm-fs); line-height:1.4; padding-bottom:80px; }
+  .logo-big { position:absolute; margin:0; left:20.8vw; top:153px; font-size:4.25vw; line-height:1; font-weight:600; letter-spacing:-.045em; }
+  .strip { display:flex; align-items:flex-start; gap:2.08vw; padding:calc(19vw - (var(--wsm-top) * 2 + 20px)) 0 0 1.04vw; width:max-content; }
+  .strip a { flex:0 0 auto; display:flex; flex-direction:column; align-items:center; gap:14px; text-align:center; }
+  .strip a.p { width:22.9vw; } .strip a.p .ph { height:calc(22.9vw * 1.25); }
+  .strip a.l { width:47.9vw; margin-top:9vw; } .strip a.l .ph { height:calc(47.9vw * .694); }
   .strip .ph { width:100%; }
-  .down { position:absolute; left:50%; bottom:24px; transform:translateX(-50%); width:44px; height:44px; display:flex; align-items:center; justify-content:center; }
-  /* ② 스크롤 아래 : PW 스타일 */
-  .lower { display:flex; align-items:flex-start; } .lower .side { position:sticky; flex:0 0 123px; }
-  main.home { flex:1; min-width:0; padding:96px 24px 0 0; max-width:1308px; }
+  .down { display:flex; justify-content:center; padding-top:40px; }
+  /* ② 스크롤 아래 : PW 홈과 같은 크기 */
+  .lower { display:flex; align-items:flex-start; }
+  .lower .side { position:sticky; flex:0 0 123px; }
+  main.home { flex:1; min-width:0; padding:96px 24px 0 10px; }
   .quote { margin:0; padding:150px 0 140px; text-align:center; }
-  .quote blockquote { margin:0 auto; max-width:900px; font-family:'Noto Serif KR',serif; font-size:30px; line-height:1.4; }
-  .quote figcaption { margin-top:18px; font-size:10px; line-height:1.6; text-transform:uppercase; letter-spacing:.04em; }
-  .single { padding-top:140px; }
-  .single .frame { width:min(100%,412px); }
-  .recs { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:24px; padding-top:150px; }
-  .rec { position:relative; aspect-ratio:4/5; }
-  .rec span { position:absolute; right:6px; bottom:6px; background:#111; color:#fff; font-size:8px; padding:2px 5px; text-transform:uppercase; letter-spacing:.06em; }
+  .quote blockquote { margin:0 auto; max-width:900px; font-family:var(--serif); font-size:var(--pw-title); line-height:1; }
+  .quote figcaption { margin-top:18px; font-size:var(--pw-side); line-height:1.4; text-transform:uppercase; }
+  .single { padding-top:140px; display:flex; justify-content:center; }
+  .single .card { width:calc((100% - 48px) / 3); }
   .about { padding-top:120px; }
-  .about p { margin:0; font-size:24px; line-height:1.32; }
-  .about a { display:inline-flex; margin-top:28px; min-height:44px; align-items:center; font-size:13px; font-weight:500; text-transform:uppercase; letter-spacing:.04em; border-bottom:1px solid #111; }
-  footer.home { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:24px; padding:160px 0 24px; font-size:10px; line-height:1.6; text-transform:uppercase; letter-spacing:.04em; }
+  .about p { margin:0; font-size:var(--pw-title); line-height:1.1; }
+  .about a { display:inline-flex; margin-top:24px; font-size:var(--pw-meta); text-transform:uppercase; border-bottom:1px solid #111; }
+  footer.home { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:24px; padding:160px 0 24px; font-size:var(--pw-side); line-height:1.4; text-transform:uppercase; }
   footer.home nav { display:flex; flex-direction:column; }
-  @media (max-width:1024px) { .logo-big { padding-left:120px; font-size:72px; } .recs { grid-template-columns:repeat(2,minmax(0,1fr)); } }
-  @media (max-width:640px) {
-    .intro { min-height:844px; } .logo-big { padding:56px 0 0 54px; font-size:52px; }
-    .strip { left:10px; top:270px; gap:20px; }
-    .strip a { width:280px !important; margin-top:0 !important; }
-    .strip a:nth-child(even) { margin-top:80px !important; }
-    .strip a .ph { height:340px !important; }
+  @media (max-width:1023px) {
+    .logo-big { left:9.6vw; top:122px; font-size:4.05vw; }
+    .strip { gap:26px; padding:calc(248px - (var(--wsm-top) * 2 + 20px)) 0 0 13px; }
+    .strip a.p { width:51.6vw; } .strip a.p .ph { height:calc(51.6vw * 1.25); }
+    .strip a.l { width:96.6vw; margin-top:49.6vw; } .strip a.l .ph { height:calc(96.6vw * .694); }
     .lower { display:block; }
-    main.home { padding:40px 20px 0; }
-    .recs { grid-template-columns:1fr; } .quote { padding:80px 0; } .quote blockquote { font-size:21px; }
-    .about p { font-size:19px; } footer.home { grid-template-columns:repeat(2,minmax(0,1fr)); padding-top:80px; }
+    main.home { padding:64px var(--pw-pad) 0; }
+    .single .card { width:calc((100% - 26px) / 3); }
+    footer.home { font-size:var(--pw-meta); }
+  }
+  @media (max-width:640px) {
+    .logo-big { left:68px; top:100px; font-size:29px; }
+    .strip { gap:24px; padding:calc(209px - (var(--wsm-top) * 2 + 20px)) 0 0 12px; }
+    .strip a.p { width:73.8vw; } .strip a.p .ph { height:calc(73.8vw * 1.25); }
+    .strip a.l { width:93.8vw; margin-top:82vw; } .strip a.l .ph { height:calc(93.8vw * .694); }
+    .quote { padding:80px 0; } .quote blockquote { font-size:23.8px; line-height:1.2; }
+    .single .card { width:100%; }
+    footer.home { grid-template-columns:repeat(2,minmax(0,1fr)); padding-top:80px; }
   }
 </style>
 </head>
@@ -49,15 +56,15 @@
 
 <section class="intro" aria-label="첫 화면">
   <header class="wsm-top">
-    <nav aria-label="빠른 메뉴" style="display:flex;gap:4px">
-      <a class="icon-btn" href="list/" aria-label="전체 글 보기"><svg aria-hidden="true" width="20" height="14" viewBox="0 0 20 14" fill="none" stroke="#111" stroke-width="1.3"><line x1="0" y1="1" x2="20" y2="1"/><line x1="0" y1="7" x2="20" y2="7"/><line x1="0" y1="13" x2="20" y2="13"/></svg></a>
-      <a class="icon-btn" href="list/?search=1" aria-label="검색"><svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="17" y1="17" x2="22" y2="22"/></svg></a>
+    <nav class="icons" aria-label="빠른 메뉴">
+      <a class="icon" href="list/" aria-label="전체 글 보기"><svg aria-hidden="true" viewBox="0 0 20 20" fill="none" stroke="#111" stroke-width="1.3"><line x1="1" y1="5" x2="19" y2="5"/><line x1="1" y1="10" x2="19" y2="10"/><line x1="1" y1="15" x2="19" y2="15"/></svg></a>
+      <a class="icon" href="list/?search=1" aria-label="검색"><svg aria-hidden="true" viewBox="0 0 20 20" fill="none" stroke="#111" stroke-width="1.4"><circle cx="8.5" cy="8.5" r="6.5"/><line x1="13.3" y1="13.3" x2="19" y2="19"/></svg></a>
     </nav>
-    <a href="list/?cat=essay" style="display:flex;align-items:center;gap:8px;font-size:12px;min-height:44px"><span class="dot" aria-hidden="true"></span>Seoul · 에세이</a>
+    <a class="right" href="list/?cat=essay"><span class="dot" aria-hidden="true"></span>Seoul · 에세이</a>
   </header>
   <h1 class="logo-big">slow days</h1>
   <div class="strip" id="strip"></div>
-  <a class="down" href="#posts" aria-label="아래로 이동"><svg aria-hidden="true" width="20" height="11" viewBox="0 0 22 12" fill="none" stroke="#111" stroke-width="1.3"><polyline points="1 1 11 11 21 1"/></svg></a>
+  <div class="down"><a class="icon" href="#posts" aria-label="아래로 이동"><svg aria-hidden="true" viewBox="0 0 22 12" fill="none" stroke="#111" stroke-width="1.3"><polyline points="1 1 11 11 21 1"/></svg></a></div>
 </section>
 
 <div class="lower" id="posts">
@@ -65,21 +72,15 @@
   <main class="home">
     <div class="grid3" id="row1"></div>
     <figure class="quote">
-      <blockquote id="quote">“빨리 지나가는 하루를 천천히 다시 봅니다.”</blockquote>
+      <blockquote>“빨리 지나가는 하루를 천천히 다시 봅니다.”</blockquote>
       <figcaption>slow days</figcaption>
     </figure>
     <div class="grid3" id="row2"></div>
     <div id="single"></div>
-    <div class="recs">
-      <a class="rec ph" href="list/?cat=books" style="--tone:#E4DED3">[추천 책 · 협업 배너]<span>Recommended</span></a>
-      <a class="rec ph" href="list/?cat=space" style="--tone:#C9CFC8">[추천 공간 · 협업 배너]<span>Recommended</span></a>
-      <a class="rec ph" href="list/?cat=daily" style="--tone:#D6CEC4">[추천 물건 · 협업 배너]<span>Recommended</span></a>
-    </div>
     <div class="about">
       <p>slow days는 빨리 지나가는 하루를 천천히 다시 보는 생활 기록입니다. 에세이, 일상, 공간, 책을 통해 오래 곁에 두고 싶은 장면을 모읍니다.</p>
       <a href="list/">전체 글 보기 · All Stories →</a>
     </div>
-    <div id="long"></div>
     <footer class="home">
       <nav aria-label="분류"><a href="list/?cat=essay">Essay 에세이</a><a href="list/?cat=daily">Daily 일상</a><a href="list/?cat=space">Space 공간</a><a href="list/?cat=books">Books 책</a></nav>
       <nav aria-label="글"><a href="list/">All 전체 글</a><a href="list/?search=1">Search 검색</a></nav>
@@ -90,26 +91,26 @@
 </div>
 
 <script type="module">
-import { getPublished, cardHTML, sideHTML, esc, safeSrc } from "./assets/fb.js";
+import { getPublished, cardHTML, sideHTML, esc, safeSrc } from "./assets/fb.js?v=4";
 document.getElementById("side").outerHTML = sideHTML("", "");
 const T = ["#E2CFCB","#D9D4CC","#C9CFC8","#E4DED3","#BFC3C7","#D6CEC4","#CCD2CB"];
-const W = [330, 330, 690, 330, 330, 690, 330], H = [413, 427, 479, 413, 495, 479, 427], M = [154, 0, 121, 0, 113, 121, 0];
+const KIND = ["p", "l", "p", "p", "l", "p", "p"];   // 세로(p) · 가로(l) 사진이 섞이는 WSM 배치
+const CAT = { essay: "에세이", daily: "일상", space: "공간", books: "책" };
 let list = [];
 try { list = await getPublished(); } catch (e) { console.error(e); }
 const strip = document.getElementById("strip");
 if (list.length) {
-  strip.innerHTML = Array.from({ length: 7 }, (_, i) => {
-    const p = list[i % list.length];
-    const url = safeSrc(p.coverThumb || p.coverUrl), cat = { essay: "에세이", daily: "일상", space: "공간", books: "책" }[p.category] || "";
-    return `<a href="post/?id=${encodeURIComponent(p.id)}" style="width:${W[i]}px;margin-top:${M[i]}px"><div class="ph" style="height:${H[i]}px;--tone:${T[i]}">${url ? `<img src="${esc(url)}" alt="${esc(p.titleKo || p.titleEn)}">` : "[사진]"}</div>${esc(p.titleKo || p.titleEn)} - ${cat}</a>`;
+  // 글 1개 = 사진 1장 (같은 글을 반복해서 채우지 않음)
+  strip.innerHTML = list.slice(0, 7).map((p, i) => {
+    const src = safeSrc(p.coverThumb || p.coverUrl);
+    return `<a class="${KIND[i]}" href="post/?id=${encodeURIComponent(p.id)}"><div class="ph" style="--tone:${T[i]}">${src ? `<img src="${esc(src)}" alt="${esc(p.titleKo || p.titleEn)}">` : "[사진]"}</div>${esc(p.titleKo || p.titleEn)} - ${CAT[p.category] || ""}</a>`;
   }).join("");
   document.getElementById("row1").innerHTML = list.slice(0, 3).map((p, i) => cardHTML(p, i, "")).join("");
   document.getElementById("row2").innerHTML = list.slice(3, 6).map((p, i) => cardHTML(p, i + 3, "")).join("");
   if (list[6]) document.getElementById("single").innerHTML = `<div class="single">${cardHTML(list[6], 6, "")}</div>`;
-  if (list[7]) document.getElementById("long").innerHTML = `<div class="single" style="padding-top:140px">${cardHTML(list[7], 7, "")}</div>`;
 } else {
-  strip.innerHTML = W.map((w, i) => `<a href="list/" style="width:${w}px;margin-top:${M[i]}px"><div class="ph" style="height:${H[i]}px;--tone:${T[i]}">[사진]</div>첫 글을 기다리는 중</a>`).join("");
-  document.getElementById("row1").innerHTML = `<p class="empty" style="grid-column:1/-1">아직 발행된 글이 없어요. 관리자 페이지에서 첫 글을 써 보세요.</p>`;
+  strip.innerHTML = KIND.slice(0, 4).map((k, i) => `<a class="${k}" href="list/"><div class="ph" style="--tone:${T[i]}">[사진]</div>첫 글을 기다리는 중</a>`).join("");
+  document.getElementById("row1").innerHTML = `<p class="empty">아직 발행된 글이 없어요.</p>`;
 }
 </script>
 </body>
