@@ -41,7 +41,7 @@
   .single { padding-top:140px; display:flex; justify-content:center; }
   .single .card { width:calc((100% - 48px) / 3); }
   .about { padding-top:120px; padding-inline:calc(123px * 2); } /* 좌우 여백 = 왼쪽 사이드 메뉴 폭(123px)의 2배 */
-  .about p { margin:0; font-size:var(--pw-title); line-height:1.1; word-break:keep-all; }
+  .about p { margin:0; font-size:calc(var(--pw-title) * 0.7); line-height:1.1; word-break:keep-all; } /* 기존 글자 크기의 70% */
   .about a { display:inline-flex; margin-top:24px; font-size:var(--pw-meta); text-transform:uppercase; border-bottom:1px solid #111; }
   footer.home { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:24px; padding:160px 0 24px; font-size:var(--pw-side); line-height:1.4; text-transform:uppercase; }
   footer.home nav { display:flex; flex-direction:column; }
