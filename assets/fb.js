@@ -157,6 +157,7 @@ export function renderBody(text) {
       const figs = imgs.map((m) => `<div class="ph" style="aspect-ratio:4/3">${m[2].startsWith("img:") ? `<img data-img="${esc(m[2].slice(4))}" alt="${esc(m[1])}">` : `<img src="${esc(m[2])}" alt="${esc(m[1])}" loading="lazy">`}</div>`).join("");
       return `<figure class="${imgs.length > 1 ? "spread" : "one"}"><div>${figs}</div>${imgs[0][1] ? `<figcaption>${esc(imgs.map((m) => m[1]).join(" · "))}</figcaption>` : ""}</figure>`;
     }
+    if (/^(!\[[^\]]*\]\([^)]*\)\s*)+$/.test(b)) return ""; // 주소가 비어 있는 사진 표시(예: ![설명](https://))는 화면에 글자로 남기지 않음
     if (b.startsWith("## ")) { n++; return `<h3 class="sub"><span>${String(n).padStart(2, "0")}</span>${inline(b.slice(3))}</h3>`; }
     if (b.startsWith("> ")) return `<blockquote>“${inline(b.replace(/^> ?/gm, ""))}”</blockquote>`;
     return `<p>${inline(b).replace(/\n/g, "<br>")}</p>`;
