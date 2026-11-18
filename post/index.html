@@ -74,7 +74,7 @@
 
 <script type="module">
 import { pageView, track, watchReading, shareUrl } from "../assets/ga.js?v=4";
-import { getPost, getPublished, sideHTML, esc, fmtDate, renderBody, cardHTML, photo, hydrateImages, CAT_EN } from "../assets/fb.js?v=5";
+import { getPost, getPublished, sideHTML, esc, fmtDate, renderBody, cardHTML, photo, hydrateImages, CAT_EN } from "../assets/fb.js?v=6";
 const qs = new URLSearchParams(location.search);
 const staticId = document.documentElement.dataset.postId || "";
 const id = staticId || qs.get("id");
@@ -90,7 +90,9 @@ let p = null;
 try { p = id ? await getPost(id) : null; } catch (e) { console.error(e); }
 document.getElementById("side").outerHTML = sideHTML("../", p ? p.category : "");
 const art = document.getElementById("art");
-const prebuilt = art.dataset.static === "1"; // 자동 생성 페이지: 본문이 이미 HTML에 들어 있음
+// 자동 생성 페이지: 본문이 이미 HTML에 들어 있음. 단, 페이지를 만든 뒤 글이 수정됐으면(다음 자동 생성 전) 최신 내용으로 다시 그림
+const builtAt = Date.parse(art.dataset.updated || "");
+const prebuilt = art.dataset.static === "1" && !!p && !(p.updatedAt && p.updatedAt.toMillis && (!builtAt || Math.abs(p.updatedAt.toMillis() - builtAt) > 1000));
 if (!p) {
   pageView({ post_id: id || "", not_found: true });
   art.innerHTML = `<p class="empty">글을 찾을 수 없어요. <a href="../list/" style="text-decoration:underline">글 목록으로 가기</a></p>`;
