@@ -31,6 +31,16 @@ jobs:
         run: npm install --no-save --no-package-lock sharp@0.33
       - name: Build pages
         run: node scripts/build-pages.mjs _site
+      # 새 글·수정 글이 있을 때만 Vercel(대표 주소)을 다시 배포해 사이트맵·RSS·글 페이지를 최신으로 유지
+      # 준비: Vercel 프로젝트 Settings > Git > Deploy Hooks 주소를 GitHub 저장소 Secrets의 VERCEL_DEPLOY_HOOK에 저장
+      - name: Refresh Vercel when posts change
+        env:
+          HOOK: ${{ secrets.VERCEL_DEPLOY_HOOK }}
+        run: |
+          if [ -z "$HOOK" ]; then echo "VERCEL_DEPLOY_HOOK 없음 - 건너뜀"; exit 0; fi
+          live=$(curl -fsS https://slow-days-blog.vercel.app/p/version.json || echo none)
+          new=$(cat _site/p/version.json)
+          if [ "$live" != "$new" ]; then curl -fsS -X POST "$HOOK" > /dev/null && echo "글 변경 감지 - Vercel 재배포 요청"; else echo "변경 없음"; fi
       - uses: actions/upload-pages-artifact@v4
         with:
           path: _site
