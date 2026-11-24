@@ -1,7 +1,7 @@
 // 단위 테스트: AI 발행 도우미 순수 함수 (실행: npm test)
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { cleanBody, extractJson, normalizeSuggestion, introStatus, buildUtm, utmSet, yymmdd, captionText } from "../assets/ai-core.js";
+import { cleanBody, extractJson, normalizeSuggestion, introStatus, buildUtm, utmSet, profileLink, yymmdd, captionText } from "../assets/ai-core.js";
 
 test("cleanBody: 사진·링크·기호 제거, 길이 제한", () => {
   const s = cleanBody("## 소제목\n\n![설명](img:abc) **굵게** [링크](https://a.com)", 100);
@@ -23,6 +23,8 @@ test("normalizeSuggestion: 잘못된 분류 제거, 태그 5개·# 정리, 해�
   assert.equal(r.category, "");
   assert.deepEqual(r.tags, ["기록", "11월", "a", "b", "c"]);
   assert.deepEqual(r.hashtags, ["#slowdays", "#일상기록"]);
+  assert.equal(r.threads, "");
+  assert.equal(normalizeSuggestion({ intro: "x", threads: "  스레드 문장 " }).threads, "스레드 문장");
   assert.equal(normalizeSuggestion({ intro: "x", category: "BOOKS" }).category, "books");
   assert.throws(() => normalizeSuggestion({}));
 });
@@ -41,14 +43,24 @@ test("buildUtm: 기존 주소 조건 유지, 필수값 확인", () => {
   assert.throws(() => buildUtm("https://ex.com/", { source: "x" }));
 });
 
-test("utmSet: 텍소노미 규칙대로 4개 링크 생성 (스토리는 한국 날짜 YYMMDD)", () => {
+test("utmSet: 스토리·스레드·카카오톡·링크 복사 4개, 모든 링크에 글 구분값(utm_content)", () => {
   const d = new Date("2026-11-24T16:00:00Z"); // 한국 시간 11월 25일 01시
   assert.equal(yymmdd(d), "261125");
-  const set = utmSet("https://ex.com/post/?id=a1", d);
-  assert.deepEqual(set.map((l) => l.key), ["ig_profile", "ig_story", "kakao", "copy_link"]);
-  assert.match(set[1].url, /utm_campaign=story_261125/);
+  const set = utmSet("https://ex.com/post/?id=a1", d, "a1");
+  assert.deepEqual(set.map((l) => l.key), ["ig_story", "threads", "kakao", "copy_link"]);
+  assert.match(set[0].url, /utm_campaign=story_261125/);
+  assert.match(set[1].url, /utm_source=threads&utm_medium=social/);
   assert.match(set[3].url, /utm_source=copy_link&utm_medium=share/);
   assert.equal(new URL(set[2].url).searchParams.has("utm_campaign"), false);
+  assert.ok(set.every((l) => new URL(l.url).searchParams.get("utm_content") === "a1"));
+  assert.equal(new URL(utmSet("https://ex.com/", d)[0].url).searchParams.has("utm_content"), false);
+});
+
+test("profileLink: 인스타 프로필 고정 링크는 글 목록 + campaign=profile, 글 구분값 없음", () => {
+  const u = new URL(profileLink("https://ex.com/list/"));
+  assert.equal(u.pathname, "/list/");
+  assert.equal(u.searchParams.get("utm_campaign"), "profile");
+  assert.equal(u.searchParams.has("utm_content"), false);
 });
 
 test("captionText: 캡션과 해시태그를 빈 줄로 연결", () => {
