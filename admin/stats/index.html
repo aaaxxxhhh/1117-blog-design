@@ -57,6 +57,8 @@
       <a href="../../" target="_blank" rel="noopener" class="muted" style="margin-top:18px">블로그 보기 →</a>
     </nav>
     <main style="min-width:0">
+      <p class="msg" id="msg" role="status" aria-live="polite" style="margin-bottom:16px"></p>
+      <button type="button" class="btn" id="retry" hidden style="margin-bottom:40px">다시 불러오기</button>
       <div id="gaBox">
         <div class="stats" id="cards"></div>
         <div class="sec"><h2>Daily 일별 방문자</h2><div class="bars" id="bars"></div><div class="axis" id="axis"></div></div>
@@ -65,8 +67,6 @@
         <div class="sec"><h2>Top Pages 인기 페이지 상위 5</h2><div class="list" id="pages"></div></div>
       </div>
       <div class="sec"><h2>AI Assist 발행 도우미 사용 현황</h2><div class="stats" id="aiCards" style="margin-bottom:8px"></div><p class="hint" id="aiNote"></p></div>
-      <p class="msg" id="msg" role="status" aria-live="polite"></p>
-      <button type="button" class="btn" id="retry" hidden>다시 불러오기</button>
     </main>
   </div>
 </section>
@@ -92,7 +92,7 @@ function list(el, rows, label, value) {
     : `<p class="hint" style="padding:10px 0">아직 데이터가 없어요.</p>`;
 }
 async function loadGa() {
-  $("msg").className = "msg"; $("msg").textContent = "GA에서 불러오는 중…"; $("retry").hidden = true;
+  $("msg").className = "msg"; $("msg").textContent = "GA에서 불러오는 중…"; $("retry").hidden = true; $("gaBox").hidden = false;
   try {
     const d = await callApi(`/api/stats?days=${days}`, { method: "GET" });
     const t = d.totals;
@@ -108,7 +108,7 @@ async function loadGa() {
     $("msg").textContent = `최근 ${days}일 · ${new Date(d.fetchedAt).toLocaleTimeString("ko-KR")} 기준 (오늘 데이터는 GA 집계에 시간이 걸려 늦게 반영될 수 있어요)`;
   } catch (e) {
     console.error(e);
-    $("msg").className = "msg err"; $("msg").textContent = e.message; $("retry").hidden = false;
+    $("msg").className = "msg err"; $("msg").textContent = e.message; $("retry").hidden = false; $("gaBox").hidden = true;
   }
 }
 async function loadAi() {
