@@ -40,7 +40,8 @@ export async function gaPost(path, body, env = process.env) {
   });
   const d = await r.json().catch(() => ({}));
   if (!r.ok) {
-    const msg = r.status === 403 ? "서비스 계정에 GA 속성 뷰어 권한이 없어요. GA 관리 > 속성 액세스 관리에서 추가해 주세요." : `GA 응답 오류 (${r.status})`;
+    const who = `(속성 ID ${id} · 계정 ${sa.client_email})`;
+    const msg = r.status === 403 ? `서비스 계정에 이 GA 속성의 뷰어 권한이 없어요. 속성 ID가 맞는지, GA 관리 > 속성 액세스 관리에 아래 계정이 있는지 확인해 주세요. ${who}` : `GA 응답 오류 (${r.status}) ${who}`;
     throw Object.assign(new Error(msg), { status: 502, code: "ga_error", detail: d?.error?.message });
   }
   return d;
