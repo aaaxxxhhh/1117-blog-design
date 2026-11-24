@@ -1,9 +1,11 @@
 // 관리자 화면 → Vercel 서버 함수 호출 (로그인 토큰 첨부, 시간 제한, 오류 문구 정리)
 import { auth } from "./fb.js?v=5";
-export * from "./ai-core.js";
+export * from "./ai-core.js?v=2";
 
 // Vercel에서 열면 같은 주소의 /api, GitHub Pages에서 열면 Vercel 주소의 /api 사용
 export const VERCEL_URL = "https://slow-days-blog.vercel.app";
+// 공유 링크는 어느 주소에서 발행해도 대표 주소(Vercel) 기준으로 만듦 (의사결정 로그 D-010)
+export const SITE_URL = VERCEL_URL;
 export const API_BASE = location.hostname.endsWith("github.io") ? VERCEL_URL : "";
 
 export async function callApi(path, { method = "POST", body, timeoutMs = 30000 } = {}) {
