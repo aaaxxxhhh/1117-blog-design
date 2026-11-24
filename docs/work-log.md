@@ -24,3 +24,4 @@
 | 11-24 · 마케팅 초기 세팅 조사 | 결정 | 검색 점유율·SNS 이용 데이터 조사 → 검색 1순위, 인스타+스레드+카카오톡 구성 (D-010~D-013) | — |
 | 11-24 · SEO 기본 세팅 | 성공 | 대표 주소 Vercel 통일, rss.xml·robots.txt 추가, 소유 확인 태그 자동 삽입, 배포 후 RSS·robots·canonical 확인 | — |
 | 11-24 · 공유 채널 재구성 | 성공 | 스레드 글 AI 생성, 공유 링크 utm_content·스레드·프로필 고정 링크, 단위 테스트 17개 통과 | — |
+| 11-24 · 네이버 서치어드바이저 | 진행 | 사이트 등록(https://slow-days-blog.vercel.app), 소유 확인 코드를 Vercel 환경 변수 NAVER_SITE_VERIFICATION에 등록 → 재배포로 메인 페이지에 태그 반영 | — |
