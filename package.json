@@ -1,0 +1,15 @@
+{
+  "name": "slow-days",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build-pages.mjs public",
+    "test": "node --test tests/"
+  },
+  "dependencies": {
+    "sharp": "0.33.5"
+  },
+  "engines": {
+    "node": "22.x"
+  }
+}
