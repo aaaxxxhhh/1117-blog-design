@@ -15,7 +15,7 @@ const API_KEY = "AIzaSyBQIgZUvgVvr-aDZ_lo9RqoKpFyBlvGg8k"; // 공개용 웹 키 
 const FS = `https://firestore.googleapis.com/v1/projects/${PROJECT}/databases/(default)/documents`;
 const OUT = path.resolve(process.argv[2] || "_site");
 const ROOT = process.cwd();
-const SKIP = new Set([".git", ".github", "scripts", "node_modules", path.basename(OUT)]);
+const SKIP = new Set([".git", ".github", "scripts", "node_modules", "api", "tests", "docs", "package.json", "package-lock.json", "vercel.json", "AGENTS.md", path.basename(OUT)]);
 const CAT_EN = { essay: "Essay", daily: "Daily", space: "Space", books: "Books" };
 
 // ---------- 유틸 ----------
