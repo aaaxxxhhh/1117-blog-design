@@ -36,3 +36,36 @@ test("buildPrompt: 제목·본문과 4개 분류 지시 포함", () => {
   const p = buildPrompt({ titleKo: "제목", titleEn: "TITLE", body: "본문" });
   for (const k of ["제목", "TITLE", "본문", "essay | daily | space | books", "\"hashtags\""]) assert.ok(p.includes(k), k);
 });
+
+import crypto from "node:crypto";
+import { readConfig, signJwt, rowsOf } from "../api/_lib/ga.js";
+import { statsRequests } from "../api/stats.js";
+
+test("readConfig: GA 설정이 없거나 깨졌으면 안내 오류(503)", () => {
+  assert.throws(() => readConfig({}), (e) => e.status === 503 && e.code === "no_ga");
+  assert.throws(() => readConfig({ GA_PROPERTY_ID: "123", GA_SERVICE_ACCOUNT: "{깨진" }), (e) => e.code === "no_ga");
+});
+
+test("signJwt: 서비스 계정 키로 서명한 JWT가 공개키로 검증됨", () => {
+  const { privateKey, publicKey } = crypto.generateKeyPairSync("rsa", { modulusLength: 2048 });
+  const sa = { client_email: "bot@x.iam.gserviceaccount.com", private_key: privateKey.export({ type: "pkcs8", format: "pem" }) };
+  const [h, b, s] = signJwt(sa, 1000).split(".");
+  const body = JSON.parse(Buffer.from(b, "base64url"));
+  assert.equal(body.iss, sa.client_email);
+  assert.equal(body.exp - body.iat, 3600);
+  assert.match(body.scope, /analytics\.readonly/);
+  assert.ok(crypto.createVerify("RSA-SHA256").update(`${h}.${b}`).verify(publicKey, Buffer.from(s, "base64url")));
+});
+
+test("rowsOf: GA 보고서 행을 이름 있는 값으로 변환", () => {
+  const r = rowsOf({ dimensionHeaders: [{ name: "date" }], metricHeaders: [{ name: "activeUsers" }], rows: [{ dimensionValues: [{ value: "20261124" }], metricValues: [{ value: "12" }] }] });
+  assert.deepEqual(r, [{ date: "20261124", activeUsers: 12 }]);
+  assert.deepEqual(rowsOf({}), []);
+});
+
+test("statsRequests: 기간(일) 반영, 보고서 5개(일괄 요청 최대치)", () => {
+  const q = statsRequests(28);
+  assert.equal(q.length, 5);
+  assert.equal(q[0].dateRanges[0].startDate, "27daysAgo");
+  assert.equal(q[2].limit, 5);
+});
