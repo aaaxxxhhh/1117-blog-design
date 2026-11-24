@@ -12,7 +12,8 @@ export function buildPrompt({ titleKo = "", titleEn = "", body = "" }) {
   "category": "essay | daily | space | books 중 하나 (에세이=생각·감정, 일상=하루 기록, 공간=장소·인테리어, 책=책 이야기)",
   "tags": ["한국어 태그 3~5개, 각 2~8자, # 없이"],
   "caption": "인스타그램 게시물 캡션. 한국어 3~5줄, 첫 줄에 호기심을 주는 문장, 마지막 줄은 '프로필 링크에서 전문 읽기'",
-  "hashtags": ["해시태그 5개, # 없이"]
+  "hashtags": ["해시태그 5개, # 없이"],
+  "threads": "스레드 게시물. 한국어 2~4문장, 본문에서 가장 여운이 남는 문장을 살려 짧게, 해시태그 없이, 마지막 줄은 '전문은 링크에서'"
 }
 
 [제목] ${titleKo} / ${titleEn}
