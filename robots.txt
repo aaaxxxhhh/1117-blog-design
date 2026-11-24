@@ -1,0 +1,8 @@
+# slow days — 검색 로봇 안내
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /write/
+Disallow: /api/
+
+Sitemap: https://slow-days-blog.vercel.app/sitemap.xml
