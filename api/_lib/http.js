@@ -25,7 +25,7 @@ export async function requireAdmin(req) {
   });
   const user = r.ok ? (await r.json()).users?.[0] : null;
   if (!user?.email) throw Object.assign(new Error("로그인이 만료됐어요. 다시 로그인해 주세요."), { status: 401 });
-  const allow = (process.env.ADMIN_EMAILS || "").split(",").map((s) => s.trim().toLowerCase()).filter(Boolean);
+  const allow = (process.env.ADMIN_EMAILS || process.env.ADMIN_EMAIL || "").split(",").map((s) => s.trim().toLowerCase()).filter(Boolean);
   if (allow.length && !allow.includes(user.email.toLowerCase())) throw Object.assign(new Error("관리자 계정이 아니에요."), { status: 403 });
   return user.email;
 }
