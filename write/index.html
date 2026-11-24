@@ -19,6 +19,14 @@
   .drop { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; min-height:180px; border:1px dashed #8A8A8A; background:#F7F6F4; cursor:pointer; text-align:center; padding:20px; }
   .drop.over { border-color:var(--ink); background:#EFEDE9; }
   .actions { display:flex; justify-content:flex-end; align-items:center; gap:10px; flex-wrap:wrap; margin-top:40px; padding:16px 0; border-top:1px solid var(--ink); }
+  .ai-out { border:1px solid var(--ink); margin-top:12px; }
+  .ai-row { display:grid; grid-template-columns:96px 1fr auto; gap:12px; align-items:start; padding:12px; border-top:1px solid #E0DEDA; }
+  .ai-row:first-child { border-top:0; }
+  .ai-row .k { font-weight:600; font-size:calc(var(--wsm-fs) - 1px); }
+  .ai-row .v { white-space:pre-wrap; line-height:1.6; word-break:break-all; }
+  .ai-row .btn { white-space:nowrap; }
+  .ai-row .btn.on { background:var(--ink); color:#fff; }
+  @media (max-width:640px) { .ai-row { grid-template-columns:1fr; } }
 </style>
 </head>
 <body>
@@ -89,6 +97,14 @@
       <input id="tags" class="line-in" placeholder="물건, 기록, 11월">
     </div></div>
 
+    <div class="row2"><p class="lab">AI 발행 도우미 AI Assist<span class="hint" style="display:block;font-weight:400;margin-top:6px;max-width:300px">본문을 쓴 뒤 누르면 소개문·분류·태그·인스타 캡션을 제안해요.<br>[적용]을 눌러야 입력란에 들어가요.</span></p><div class="fld">
+      <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+        <button type="button" class="btn dark" id="aiBtn">AI 발행 준비</button>
+        <p class="msg" id="aiMsg" role="status" aria-live="polite"></p>
+      </div>
+      <div id="aiOut" class="ai-out" hidden></div>
+    </div></div>
+
     <div class="row2"><p class="lab">발행 설정 Publish</p><div class="fld" style="flex-direction:row;flex-wrap:wrap;gap:24px;align-items:flex-end">
       <div style="display:flex;flex-direction:column;gap:6px"><label for="pubdate" class="hint">발행일 (비워 두면 지금 발행 · 미래 날짜면 예약 발행)</label>
         <input id="pubdate" class="box-in" type="date"></div>
@@ -102,10 +118,23 @@
     <button type="submit" class="btn dark" id="pubBtn">발행하기</button>
   </div>
 </form>
+
+<section class="wsm-page" id="done" hidden>
+  <h1 class="wsm-title">Published 발행했어요</h1>
+  <p class="hint" style="margin-bottom:24px">공유할 곳에 맞는 링크를 복사해 쓰세요. 링크마다 유입 경로 표시(UTM)가 붙어 있어 방문 통계에서 어디서 들어왔는지 볼 수 있어요.</p>
+  <div class="ai-out" id="utmOut"></div>
+  <div class="ai-out" id="capOut" hidden style="margin-top:24px"></div>
+  <div class="actions">
+    <p class="msg" id="doneMsg" role="status" style="margin-right:auto"></p>
+    <a class="btn" href="../admin/">관리자로</a>
+    <a class="btn dark" id="viewBtn" href="#">글 보기</a>
+  </div>
+</section>
 <footer class="wsm-foot">© 2026 slow days · 관리자 전용 화면</footer>
 
 <script type="module">
 import { onUser, getPost, savePost, uploadImage, fileToDataURL, getImage, esc, safeSrc, fmtDate } from "../assets/fb.js?v=5";
+import { callApi, copyText, utmSet, captionText, introStatus, CATEGORIES } from "../assets/ai.js?v=1";
 const $ = (id) => document.getElementById(id);
 let id = new URLSearchParams(location.search).get("id");
 const F = ["titleEn", "titleKo", "category", "author", "coverCredit", "intro", "body"];
@@ -113,6 +142,8 @@ const F = ["titleEn", "titleKo", "category", "author", "coverCredit", "intro", "
 const countIntro = () => { const n = $("intro").value.trim().length; $("introCount").textContent = `${n}자 · 권장 80~120자${n < 80 ? " (조금 더 써 주세요)" : ""}`; };
 document.addEventListener("input", (e) => { if (e.target.id === "intro") countIntro(); });
 let cover = { id: "", thumb: "", file: null };
+// AI 사용 기록 (글 문서 aiAssist 필드에 함께 저장 — 의사결정 로그 D-004)
+let ai = { requests: 0, applied: new Set(), model: "", result: null, prev: null };
 
 onUser(async (user) => {
   if (user) { try { localStorage.setItem("sd_internal", "1"); } catch {} } // GA 내부 방문 제외 표시
@@ -126,6 +157,7 @@ onUser(async (user) => {
       $("ttl").textContent = "Edit Story 글 수정";
       $("prevBtn").hidden = false;
       cover = { id: p.coverId || "", thumb: p.coverThumb || "", file: null };
+      ai.prev = p.aiAssist || null;
       showCover(cover.thumb);
       if (cover.id) getImage(cover.id).then((d) => d && showCover(d)).catch(() => {});
     } else id = null;
@@ -185,11 +217,12 @@ async function save(status) {
   if (cover.file) { try { cover.id = await uploadImage(cover.file); cover.file = null; } catch (err) { console.error(err); $("msg").className = "msg err"; $("msg").textContent = "대표 사진을 올리지 못했어요."; return; } }
   data.coverId = cover.id; data.coverThumb = cover.thumb; data.coverUrl = "";
   if ($("pubdate").value) data.publishedAtStr = $("pubdate").value;
+  if (ai.requests || ai.prev) data.aiAssist = aiRecord();
   $("msg").className = "msg"; $("msg").textContent = "저장하는 중…";
   ["draftBtn", "pubBtn"].forEach((k) => ($(k).disabled = true));
   try {
     id = await savePost(id, data);
-    if (status === "published") { location.href = `../post/?id=${encodeURIComponent(id)}`; return; }
+    if (status === "published") { showDone(id); return; }
     $("msg").textContent = "임시 저장했어요."; $("prevBtn").hidden = false;
     history.replaceState(null, "", `?id=${encodeURIComponent(id)}`);
   } catch (e) { console.error(e); $("msg").className = "msg err"; $("msg").textContent = "저장하지 못했어요. 관리자 계정으로 로그인했는지 확인해 주세요."; }
@@ -198,6 +231,79 @@ async function save(status) {
 $("f").onsubmit = (e) => { e.preventDefault(); save("published"); };
 $("draftBtn").onclick = () => save("draft");
 $("prevBtn").onclick = () => window.open(`../post/?id=${encodeURIComponent(id)}`, "_blank");
+
+// ---------- F1·F4·F5 AI 발행 준비 ----------
+const CAT_KO = { essay: "에세이 Essay", daily: "일상 Daily", space: "공간 Space", books: "책 Books" };
+function aiRecord() {
+  const p = ai.prev || {};
+  return {
+    requests: (p.requests || 0) + ai.requests,
+    applied: [...new Set([...(p.applied || []), ...ai.applied])],
+    model: ai.model || p.model || "",
+    lastAt: new Date().toISOString(),
+  };
+}
+function setMsg(el, text, err) { el.className = "msg" + (err ? " err" : ""); el.textContent = text; }
+function row(key, label, value, btn) {
+  return `<div class="ai-row"><span class="k">${label}</span><div class="v" id="ai_${key}">${value}</div>${btn}</div>`;
+}
+function renderAi(r) {
+  const st = introStatus(r.intro);
+  const tag = (k, t) => `<button type="button" class="btn" data-apply="${k}">${t}</button>`;
+  $("aiOut").innerHTML =
+    row("intro", "소개문", `${esc(r.intro)}<br><span class="hint">${st.length}자${st.ok ? "" : " · 권장 80~120자, 적용 후 다듬어 주세요"}</span>`, r.intro ? tag("intro", "적용") : "") +
+    row("category", "분류", esc(CAT_KO[r.category] || "추천 없음"), r.category ? tag("category", "적용") : "") +
+    row("tags", "태그", esc(r.tags.join(", ") || "추천 없음"), r.tags.length ? tag("tags", "적용") : "") +
+    row("caption", "인스타 캡션", esc(captionText(r) || "추천 없음"), r.caption ? `<button type="button" class="btn" data-copy="caption">복사</button>` : "") +
+    `<div class="ai-row"><span class="k"></span><span class="hint">모델 ${esc(ai.model)} · 결과는 저장 전까지 언제든 고칠 수 있어요.</span><button type="button" class="btn dark" data-apply="all">모두 적용</button></div>`;
+  $("aiOut").hidden = false;
+}
+function applyField(k) {
+  const r = ai.result; if (!r) return;
+  if (k === "intro" && r.intro) { $("intro").value = r.intro; countIntro(); }
+  else if (k === "category" && CATEGORIES.includes(r.category)) $("category").value = r.category;
+  else if (k === "tags" && r.tags.length) $("tags").value = r.tags.join(", ");
+  else return;
+  ai.applied.add(k);
+  const b = $("aiOut").querySelector(`[data-apply="${k}"]`); if (b) { b.textContent = "적용됨"; b.classList.add("on"); }
+}
+$("aiOut").onclick = async (e) => {
+  const b = e.target.closest("button"); if (!b) return;
+  if (b.dataset.apply === "all") { ["intro", "category", "tags"].forEach(applyField); setMsg($("aiMsg"), "소개문·분류·태그를 모두 적용했어요."); }
+  else if (b.dataset.apply) applyField(b.dataset.apply);
+  else if (b.dataset.copy) { const ok = await copyText(captionText(ai.result)); setMsg($("aiMsg"), ok ? "인스타 캡션을 복사했어요." : "복사하지 못했어요. 글자를 직접 선택해 복사해 주세요.", !ok); }
+};
+$("aiBtn").onclick = async () => {
+  const body = $("body").value.trim();
+  if (body.replace(/!\[[^\]]*\]\([^)]*\)/g, "").trim().length < 50) { setMsg($("aiMsg"), "본문을 50자 이상 쓴 뒤에 눌러 주세요.", true); $("body").focus(); return; }
+  $("aiBtn").disabled = true; $("aiBtn").textContent = "AI가 읽는 중…"; setMsg($("aiMsg"), "보통 5~10초 걸려요. 입력한 내용은 그대로 남아 있어요.");
+  try {
+    const d = await callApi("/api/ai-assist", { body: { titleKo: $("titleKo").value, titleEn: $("titleEn").value, body } });
+    ai.requests++; ai.model = d.model; ai.result = d.result;
+    renderAi(d.result);
+    setMsg($("aiMsg"), `제안이 도착했어요 (${(d.ms / 1000).toFixed(1)}초). 필요한 항목만 [적용]하세요.`);
+  } catch (err) {
+    console.error(err);
+    setMsg($("aiMsg"), `${err.message} 입력한 내용은 지워지지 않았어요.`, true);
+  } finally { $("aiBtn").disabled = false; $("aiBtn").textContent = ai.result ? "다시 제안 받기" : "AI 발행 준비"; }
+};
+
+// ---------- F2 발행 후 UTM 링크 ----------
+function showDone(postId) {
+  const url = new URL(`../post/?id=${encodeURIComponent(postId)}`, location.href).toString();
+  const links = utmSet(url);
+  $("utmOut").innerHTML = links.map((l) => row(l.key, esc(l.label), esc(l.url), `<button type="button" class="btn" data-url="${esc(l.url)}">복사</button>`)).join("");
+  if (ai.result?.caption) { $("capOut").innerHTML = row("cap2", "인스타 캡션", esc(captionText(ai.result)), `<button type="button" class="btn" data-cap="1">복사</button>`); $("capOut").hidden = false; }
+  $("viewBtn").href = url;
+  $("f").hidden = true; $("done").hidden = false; window.scrollTo(0, 0);
+}
+$("done").onclick = async (e) => {
+  const b = e.target.closest("button"); if (!b) return;
+  const text = b.dataset.url || (b.dataset.cap ? captionText(ai.result) : "");
+  const ok = await copyText(text);
+  if (ok) { b.textContent = "복사됨"; b.classList.add("on"); }
+  setMsg($("doneMsg"), ok ? "복사했어요. 붙여 넣을 곳에 그대로 쓰세요." : "복사하지 못했어요. 글자를 직접 선택해 복사해 주세요.", !ok);
+};
 </script>
 </body>
 </html>
