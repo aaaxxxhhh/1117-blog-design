@@ -8,8 +8,10 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import sharp from "sharp";
+import { createHash } from "node:crypto";
 
-const SITE = "https://aaaxxxhhh.github.io/1117-blog-design";
+// 대표 주소(검색·공유 기준). GitHub Pages로 만든 사본도 이 주소를 대표로 가리킴 (의사결정 로그 D-010)
+const SITE = (process.env.SITE_URL || "https://slow-days-blog.vercel.app").replace(/\/$/, "");
 const PROJECT = "slow-days-blog";
 const API_KEY = "AIzaSyBQIgZUvgVvr-aDZ_lo9RqoKpFyBlvGg8k"; // 공개용 웹 키 (assets/fb.js와 동일)
 const FS = `https://firestore.googleapis.com/v1/projects/${PROJECT}/databases/(default)/documents`;
@@ -208,4 +210,39 @@ ${urls.map((u) => `  <url><loc>${esc(u.loc)}</loc>${u.lastmod ? `<lastmod>${esc(
 `;
 await fs.writeFile(path.join(OUT, "sitemap.xml"), sitemap);
 await fs.writeFile(path.join(OUT, "p", "ids.json"), JSON.stringify(posts.map((p) => p.id)));
-console.log(`글 페이지 ${posts.length}개 생성 (자체 썸네일 ${withImg}개), sitemap.xml ${urls.length}개 주소`);
+// 글 목록·수정 시각이 바뀌었는지 비교하는 값 (GitHub Actions가 Vercel 재배포 여부 판단에 사용)
+await fs.writeFile(path.join(OUT, "p", "version.json"), JSON.stringify(createHash("sha1").update(posts.map((p) => `${p.id}:${p.updatedAt || ""}`).join("|")).digest("hex")));
+
+// RSS: 최근 글 20개 (네이버 서치어드바이저·구독 앱이 새 글을 빨리 알 수 있게)
+const rfc822 = (d) => (d ? new Date(d).toUTCString() : "");
+const rss = `<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+<channel>
+  <title>slow days</title>
+  <link>${SITE}/</link>
+  <description>빨리 지나가는 하루를 천천히 다시 보는 생활 기록. 에세이, 일상, 공간, 책 이야기를 모읍니다.</description>
+  <language>ko</language>
+  <atom:link href="${SITE}/rss.xml" rel="self" type="application/rss+xml"/>
+${posts.slice(0, 20).map((p) => {
+  const url = `${SITE}/p/${encodeURIComponent(p.id)}/`;
+  return `  <item>
+    <title>${esc(p.titleKo || p.titleEn)}</title>
+    <link>${esc(url)}</link>
+    <guid isPermaLink="true">${esc(url)}</guid>
+    <description>${esc(cut(plain(p.intro) || plain(p.body), 200))}</description>
+    ${p.category ? `<category>${esc(CAT_EN[p.category] || p.category)}</category>\n    ` : ""}${p.publishedAt ? `<pubDate>${rfc822(p.publishedAt)}</pubDate>` : ""}
+  </item>`;
+}).join("\n")}
+</channel>
+</rss>
+`;
+await fs.writeFile(path.join(OUT, "rss.xml"), rss);
+
+// 검색엔진 소유 확인 태그: 환경 변수에 값이 있을 때만 메인 페이지에 추가 (코드 수정 없이 등록 가능)
+const verify = [["naver-site-verification", process.env.NAVER_SITE_VERIFICATION], ["google-site-verification", process.env.GOOGLE_SITE_VERIFICATION]]
+  .filter(([, v]) => v && /^[\w-]+$/.test(v.trim())).map(([n, v]) => `<meta name="${n}" content="${v.trim()}">`);
+if (verify.length) {
+  const home = path.join(OUT, "index.html");
+  await fs.writeFile(home, (await fs.readFile(home, "utf8")).replace("</title>", `</title>\n${verify.join("\n")}`));
+}
+console.log(`글 페이지 ${posts.length}개 생성 (자체 썸네일 ${withImg}개), sitemap.xml ${urls.length}개 주소, rss.xml ${Math.min(20, posts.length)}개 글, 소유 확인 태그 ${verify.length}개 · 대표 주소 ${SITE}`);
