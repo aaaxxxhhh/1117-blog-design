@@ -34,7 +34,7 @@ test("generateJson: 키 오류(403)는 다른 모델을 시도하지 않고 실�
 
 test("buildPrompt: 제목·본문과 4개 분류 지시 포함", () => {
   const p = buildPrompt({ titleKo: "제목", titleEn: "TITLE", body: "본문" });
-  for (const k of ["제목", "TITLE", "본문", "essay | daily | space | books", "\"hashtags\""]) assert.ok(p.includes(k), k);
+  for (const k of ["제목", "TITLE", "본문", "essay | daily | space | books", "\"hashtags\"", "\"threads\""]) assert.ok(p.includes(k), k);
 });
 
 import crypto from "node:crypto";
