@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+<meta name="robots" content="noindex">
+<title>방문 통계 — slow days</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;700&display=swap"></noscript>
+<link rel="stylesheet" href="../../assets/style.css?v=6">
+<style>
+  .menu { display:flex; flex-direction:column; align-items:flex-start; gap:6px; font-weight:500; }
+  .menu a, .menu button { border:0; background:none; padding:0; cursor:pointer; font-size:inherit; text-align:left; }
+  .menu .on { text-decoration:underline; text-underline-offset:4px; }
+  .dash.row2 { grid-template-columns:calc(43.3vw - var(--wsm-pad)) minmax(0,1fr); }
+  .head2 { display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:16px; }
+  .period { display:flex; gap:0; } .period button { min-height:36px; padding:0 14px; border:1px solid var(--ink); margin-left:-1px; background:#fff; cursor:pointer; }
+  .period button[aria-pressed="true"] { background:var(--ink); color:#fff; }
+  .stats { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); border-top:1px solid var(--ink); border-bottom:1px solid var(--ink); margin-bottom:40px; }
+  .stats div { padding:14px 0; } .stats b { display:block; margin-top:4px; font-size:40px; line-height:1; font-weight:400; }
+  .sec { margin-bottom:48px; } .sec h2 { font-size:var(--wsm-fs); font-weight:600; text-transform:uppercase; padding-bottom:10px; border-bottom:1px solid var(--ink); margin-bottom:8px; }
+  .bars { display:flex; align-items:flex-end; gap:3px; height:140px; padding-top:8px; }
+  .bars span { flex:1; background:var(--ink); min-height:2px; position:relative; }
+  .bars span:hover::after { content:attr(data-t); position:absolute; bottom:100%; left:50%; transform:translateX(-50%); white-space:nowrap; font-size:11px; background:#fff; border:1px solid var(--ink); padding:2px 4px; }
+  .axis { display:flex; justify-content:space-between; font-size:11px; color:var(--sub); margin-top:6px; }
+  .list { display:grid; } .list div { display:grid; grid-template-columns:minmax(0,1fr) 80px; gap:12px; padding:10px 0; border-bottom:1px solid var(--line); }
+  .list div span:last-child { text-align:right; font-variant-numeric:tabular-nums; }
+  .list i { display:block; height:3px; background:var(--soft); margin-top:6px; } .list i b { display:block; height:3px; background:var(--ink); }
+  .notice { border:1px solid var(--ink); padding:16px; line-height:1.7; margin-bottom:40px; }
+  @media (max-width:640px) { .stats { grid-template-columns:repeat(2,minmax(0,1fr)); } .dash.row2 { grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+<header class="wsm-top">
+  <span class="icons hint" style="top:calc(var(--wsm-top) + 2px)">/admin/stats</span>
+  <div class="right"><a class="logo-s" href="../../">slow days</a><span class="dot" aria-hidden="true"></span><span id="who">관리자</span></div>
+</header>
+
+<p class="empty" id="wait">로그인 상태를 확인하는 중…</p>
+
+<section id="view" class="wsm-page" hidden>
+  <div class="head2" style="margin-bottom:60px">
+    <h1 class="wsm-title" style="margin-bottom:0">Stats 방문 통계</h1>
+    <div class="period" role="group" aria-label="기간">
+      <button type="button" data-days="7" aria-pressed="true">7일</button>
+      <button type="button" data-days="28" aria-pressed="false">28일</button>
+      <button type="button" data-days="90" aria-pressed="false">90일</button>
+    </div>
+  </div>
+  <div class="row2 dash">
+    <nav class="menu lab" aria-label="관리 메뉴">
+      <a href="../">Posts 글 관리</a>
+      <a href="./" class="on" aria-current="page">Stats 방문 통계</a>
+      <a href="../../write/">Write 새 글 쓰기</a>
+      <a href="../../" target="_blank" rel="noopener" class="muted" style="margin-top:18px">블로그 보기 →</a>
+    </nav>
+    <main style="min-width:0">
+      <div id="gaBox">
+        <div class="stats" id="cards"></div>
+        <div class="sec"><h2>Daily 일별 방문자</h2><div class="bars" id="bars"></div><div class="axis" id="axis"></div></div>
+        <div class="sec"><h2>Source 유입 경로 상위 5</h2><div class="list" id="sources"></div></div>
+        <div class="sec"><h2>Campaign UTM 캠페인</h2><div class="list" id="campaigns"></div></div>
+        <div class="sec"><h2>Top Pages 인기 페이지 상위 5</h2><div class="list" id="pages"></div></div>
+      </div>
+      <div class="sec"><h2>AI Assist 발행 도우미 사용 현황</h2><div class="stats" id="aiCards" style="margin-bottom:8px"></div><p class="hint" id="aiNote"></p></div>
+      <p class="msg" id="msg" role="status" aria-live="polite"></p>
+      <button type="button" class="btn" id="retry" hidden>다시 불러오기</button>
+    </main>
+  </div>
+</section>
+<footer class="wsm-foot">© 2026 slow days · 관리자 전용 화면</footer>
+
+<script type="module">
+import { onUser, getAllPosts, esc } from "../../assets/fb.js?v=5";
+import { callApi } from "../../assets/ai.js?v=1";
+const $ = (id) => document.getElementById(id);
+const num = (n) => Number(n || 0).toLocaleString("ko-KR");
+let days = 7;
+
+onUser(async (user) => {
+  if (!user) { location.replace("../"); return; }
+  try { localStorage.setItem("sd_internal", "1"); } catch {} // GA 내부 방문 제외 표시
+  $("who").textContent = user.email; $("wait").hidden = true; $("view").hidden = false;
+  loadAi(); loadGa();
+});
+
+function list(el, rows, label, value) {
+  const max = Math.max(1, ...rows.map(value));
+  el.innerHTML = rows.length ? rows.map((r) => `<div><span>${esc(label(r))}<i><b style="width:${(value(r) / max) * 100}%"></b></i></span><span>${num(value(r))}</span></div>`).join("")
+    : `<p class="hint" style="padding:10px 0">아직 데이터가 없어요.</p>`;
+}
+async function loadGa() {
+  $("msg").className = "msg"; $("msg").textContent = "GA에서 불러오는 중…"; $("retry").hidden = true;
+  try {
+    const d = await callApi(`/api/stats?days=${days}`, { method: "GET" });
+    const t = d.totals;
+    $("cards").innerHTML = [["사용자", t.activeUsers], ["페이지 조회", t.screenPageViews], ["세션", t.sessions], ["지금 접속 (30분)", d.realtime ?? "-"]]
+      .map(([l, n]) => `<div><span class="hint">${l}</span><b>${typeof n === "number" ? num(n) : n}</b></div>`).join("");
+    const max = Math.max(1, ...d.daily.map((r) => r.activeUsers));
+    const md = (s) => `${Number(s.slice(4, 6))}.${Number(s.slice(6, 8))}`;
+    $("bars").innerHTML = d.daily.map((r) => `<span style="height:${(r.activeUsers / max) * 100}%" data-t="${md(r.date)} · ${r.activeUsers}명"></span>`).join("") || `<p class="hint">아직 데이터가 없어요.</p>`;
+    $("axis").innerHTML = d.daily.length ? `<span>${md(d.daily[0].date)}</span><span>${md(d.daily.at(-1).date)}</span>` : "";
+    list($("sources"), d.sources, (r) => r.sessionSourceMedium, (r) => r.sessions);
+    list($("campaigns"), d.campaigns, (r) => r.sessionCampaignName, (r) => r.sessions);
+    list($("pages"), d.pages, (r) => `${r.pageTitle || "(제목 없음)"} · ${r.pagePath}`, (r) => r.screenPageViews);
+    $("msg").textContent = `최근 ${days}일 · ${new Date(d.fetchedAt).toLocaleTimeString("ko-KR")} 기준 (오늘 데이터는 GA 집계에 시간이 걸려 늦게 반영될 수 있어요)`;
+  } catch (e) {
+    console.error(e);
+    $("msg").className = "msg err"; $("msg").textContent = e.message; $("retry").hidden = false;
+  }
+}
+async function loadAi() {
+  try {
+    const posts = await getAllPosts();
+    const used = posts.filter((p) => p.aiAssist?.requests);
+    const req = used.reduce((s, p) => s + p.aiAssist.requests, 0);
+    const applied = used.reduce((s, p) => s + (p.aiAssist.applied || []).length, 0);
+    const rate = used.length ? Math.round((applied / (used.length * 3)) * 100) : 0;
+    $("aiCards").innerHTML = [["AI 사용 글", `${used.length} / ${posts.length}`], ["AI 요청", req], ["적용 항목", applied], ["채택률", `${rate}%`]]
+      .map(([l, n]) => `<div><span class="hint">${l}</span><b>${typeof n === "number" ? num(n) : n}</b></div>`).join("");
+    $("aiNote").textContent = "채택률 = 적용한 항목 수 ÷ (AI 사용 글 수 × 3개 항목: 소개문·분류·태그). 목표 70% (목표 가설, 검증 전)";
+  } catch (e) { console.error(e); $("aiNote").textContent = "AI 사용 기록을 불러오지 못했어요."; }
+}
+document.querySelector(".period").onclick = (e) => {
+  const b = e.target.closest("[data-days]"); if (!b) return;
+  days = Number(b.dataset.days);
+  document.querySelectorAll(".period button").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+  loadGa();
+};
+$("retry").onclick = loadGa;
+</script>
+</body>
+</html>
