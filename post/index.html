@@ -31,7 +31,7 @@
   .body { margin:48px auto 0; width:36.2vw; padding-left:7.6vw; font-size:14.4px; line-height:1.45; }
   .body p { margin:0 0 20px; }
   .body h3.sub { margin:48px 0 14px; font-size:var(--pw-side); font-weight:500; text-transform:uppercase; color:var(--sub); display:flex; gap:12px; }
-  .body blockquote { margin:96px 0 96px calc(123px - 39.5vw); width:calc(100vw - 147px); text-align:center; font-family:var(--serif); font-size:var(--pw-title); line-height:1.1; }
+  .body blockquote { box-sizing:border-box; margin:96px 0 96px calc(123px - 39.5vw); width:calc(100vw - 147px); padding-inline:calc(123px * 2); text-align:center; font-family:var(--serif); font-size:var(--pw-title); line-height:1.1; word-break:keep-all; } /* 좌우 여백 = 메인 페이지 소개 문단과 같은 사이드 메뉴 폭의 2배 */
   .body figure { margin:72px 0; }
   .body figure.spread { margin-left:calc(123px - 39.5vw); width:calc(100vw - 147px); }
   .body figure.spread > div { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:24px; }
@@ -50,7 +50,7 @@
     .col { margin-left:26.3vw; margin-right:0; width:47.5vw; }
     .intro { font-size:17px; }
     .body { margin:48px 0 0 26.3vw; width:47.5vw; padding-left:0; font-size:15.3px; }
-    .body blockquote { margin:72px 0 72px -26.3vw; width:calc(100vw - 26px); }
+    .body blockquote { margin:72px 0 72px -26.3vw; width:calc(100vw - 26px); padding-inline:13vw; }
     .body figure.spread { margin-left:-26.3vw; width:calc(100vw - 26px); }
     .foot { padding:14px var(--pw-pad) max(20px, env(safe-area-inset-bottom)); }
   }
@@ -61,7 +61,7 @@
     .cover { margin-top:44px; }
     .body figure.spread, .body blockquote { margin-left:0; width:100%; }
     .body figure.spread > div { grid-template-columns:1fr; }
-    .body blockquote { font-size:23.8px; }
+    .body blockquote { font-size:23.8px; padding-inline:0; }
   }
 </style>
 </head>
